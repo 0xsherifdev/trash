@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vector Mastery — Geometry, Logo & Type</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+  :root {
+    --bg: #0a0a0b;
+    --surface: #131316;
+    --surface2: #1a1a1f;
+    --border: #2a2a30;
+    --text: #e8e8ed;
+    --text-dim: #8888a0;
+    --accent: #6c5ce7;
+    --accent2: #00cec9;
+    --accent3: #fd79a8;
+    --accent4: #fdcb6e;
+    --figma: #a259ff;
+    --illustrator: #ff9a00;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    backdrop-filter: blur(20px) saturate(1.5);
+    background: rgba(10,10,11,0.75);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+  }
+  nav .inner {
+    max-width: 1200px; margin: auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  nav .logo {
+    font-weight: 800; font-size: 1.1rem; letter-spacing: -0.5px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  nav .logo svg { width: 28px; height: 28px; }
+  nav ul { list-style: none; display: flex; gap: 6px; }
+  nav ul li a {
+    text-decoration: none; color: var(--text-dim); font-size: 0.82rem;
+    font-weight: 500; padding: 6px 14px; border-radius: 8px;
+    transition: all 0.2s;
+  }
+  nav ul li a:hover { color: var(--text); background: var(--surface2); }
+  nav ul li a.active { color: var(--accent); background: rgba(108,92,231,0.1); }
+
+  /* ── SECTIONS ── */
+  section { padding: 6rem 2rem 4rem; max-width: 1200px; margin: auto; }
+  .section-label {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+  .section-title {
+    font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800;
+    letter-spacing: -1.5px; line-height: 1.15; margin-bottom: 1rem;
+  }
+  .section-sub {
+    font-size: 1.05rem; color: var(--text-dim); max-width: 600px;
+    line-height: 1.7; margin-bottom: 3rem;
+  }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; position: relative;
+    overflow: hidden; padding-top: 60px;
+  }
+  #hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(108,92,231,0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 30% at 30% 60%, rgba(0,206,201,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--accent);
+    border: 1px solid rgba(108,92,231,0.3); padding: 6px 18px;
+    border-radius: 100px; margin-bottom: 2rem;
+    background: rgba(108,92,231,0.06);
+  }
+  #hero .section-title { max-width: 800px; font-size: clamp(2.5rem, 6vw, 4.5rem); }
+  #hero .section-sub { max-width: 540px; margin-left: auto; margin-right: auto; }
+  .hero-tools {
+    display: flex; gap: 2rem; margin-top: 1rem; align-items: center;
+  }
+  .hero-tools .tool {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.85rem; font-weight: 500;
+  }
+  .hero-tools .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .hero-tools .dot.figma { background: var(--figma); }
+  .hero-tools .dot.ai { background: var(--illustrator); }
+  .scroll-hint {
+    position: absolute; bottom: 2.5rem;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 8px; color: var(--text-dim); font-size: 0.72rem;
+    letter-spacing: 1px; text-transform: uppercase;
+    animation: float 2.5s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+  }
+
+  /* ── CARDS GRID ── */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    transition: all 0.3s ease;
+    position: relative; overflow: hidden;
+  }
+  .card:hover {
+    border-color: rgba(108,92,231,0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+  .card-icon {
+    width: 100%; aspect-ratio: 16/10;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.5rem; border-radius: var(--radius-sm);
+    background: var(--surface2);
+    position: relative; overflow: hidden;
+  }
+  .card h3 {
+    font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;
+    letter-spacing: -0.3px;
+  }
+  .card p { font-size: 0.88rem; color: var(--text-dim); line-height: 1.65; }
+
+  .tag-row { display: flex; gap: 6px; margin-top: 1rem; flex-wrap: wrap; }
+  .tag {
+    font-size: 0.68rem; font-weight: 600; padding: 3px 10px;
+    border-radius: 6px; letter-spacing: 0.3px;
+  }
+  .tag.figma { background: rgba(162,89,255,0.12); color: var(--figma); }
+  .tag.ai { background: rgba(255,154,0,0.12); color: var(--illustrator); }
+  .tag.both { background: rgba(108,92,231,0.12); color: var(--accent); }
+
+  /* ── INTERACTIVE BOOLEAN DEMO ── */
+  .bool-demo {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden; margin-bottom: 2rem;
+  }
+  .bool-tabs {
+    display: flex; border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .bool-tab {
+    padding: 1rem 1.5rem; font-size: 0.82rem; font-weight: 600;
+    color: var(--text-dim); cursor: pointer; border: none;
+    background: none; transition: all 0.2s; white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    flex: 1; text-align: center;
+  }
+  .bool-tab:hover { color: var(--text); background: var(--surface2); }
+  .bool-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(108,92,231,0.04); }
+
+  .bool-panel { display: none; padding: 2.5rem; }
+  .bool-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+  .bool-visual { display: flex; align-items: center; justify-content: center; }
+  .bool-visual svg { width: 100%; max-width: 320px; }
+  .bool-info h3 {
+    font-size: 1.6rem; font-weight: 800; margin-bottom: 0.75rem;
+    letter-spacing: -0.5px;
+  }
+  .bool-info p { font-size: 0.92rem; color: var(--text-dim); margin-bottom: 1.25rem; }
+  .shortcut-row { display: flex; gap: 1.5rem; margin-top: 1rem; }
+  .shortcut-item { display: flex; flex-direction: column; gap: 4px; }
+  .shortcut-label { font-size: 0.68rem; color: var(--text-dim); font-weight: 500; }
+  .shortcut-keys {
+    display: flex; gap: 4px; align-items: center;
+  }
+  .key {
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 4px 10px; border-radius: 6px; font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace; font-weight: 500;
+    color: var(--text);
+  }
+  .key + .key-sep { font-size: 0.7rem; color: var(--text-dim); }
+
+  /* ── TRICKS SECTION ── */
+  .tricks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.25rem; }
+  .trick-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 2rem;
+    display: flex; gap: 1.5rem; align-items: flex-start;
+    transition: all 0.3s;
+  }
+  .trick-card:hover {
+    border-color: rgba(0,206,201,0.3);
+    transform: translateY(-2px);
+  }
+  .trick-num {
+    font-size: 2.5rem; font-weight: 900; color: var(--surface2);
+    line-height: 1; min-width: 50px;
+    -webkit-text-stroke: 1px var(--border);
+  }
+  .trick-card:hover .trick-num { -webkit-text-stroke-color: var(--accent2); }
+  .trick-content h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .trick-content p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; }
+
+  /* ── LOGO SECTION ── */
+  .logo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+  .logo-principle {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 2rem; text-align: center;
+    transition: all 0.3s;
+  }
+  .logo-principle:hover {
+    border-color: rgba(253,121,168,0.3);
+    transform: translateY(-3px);
+  }
+  .logo-principle .lp-icon {
+    width: 72px; height: 72px; margin: 0 auto 1.25rem;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 16px;
+  }
+  .logo-principle h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .logo-principle p { font-size: 0.83rem; color: var(--text-dim); line-height: 1.6; }
+
+  /* ── SHAPE PSYCHOLOGY ── */
+  .shapes-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem; margin-top: 2rem;
+  }
+  .shape-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.75rem; text-align: center;
+    transition: all 0.3s;
+  }
+  .shape-card:hover { border-color: rgba(253,203,110,0.3); transform: translateY(-2px); }
+  .shape-card svg { width: 56px; height: 56px; margin-bottom: 1rem; }
+  .shape-card h5 { font-size: 0.92rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .shape-card p { font-size: 0.78rem; color: var(--text-dim); line-height: 1.5; }
+
+  /* ── TYPOGRAPHY SECTION ── */
+  .type-demo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-bottom: 3rem; }
+  .type-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; transition: all 0.3s;
+  }
+  .type-card:hover { border-color: rgba(108,92,231,0.3); transform: translateY(-3px); }
+  .type-card .visual {
+    height: 200px; display: flex; align-items: center; justify-content: center;
+    background: var(--surface2); position: relative; overflow: hidden;
+  }
+  .type-card .info { padding: 1.5rem; }
+  .type-card .info h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .type-card .info p { font-size: 0.83rem; color: var(--text-dim); line-height: 1.6; }
+
+  /* ── INTERACTIVE KERNING ── */
+  .kern-demo {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 3rem; text-align: center;
+    margin-bottom: 2rem;
+  }
+  .kern-word {
+    font-size: clamp(3rem, 8vw, 6rem); font-weight: 800;
+    letter-spacing: -2px; margin-bottom: 1.5rem;
+    display: inline-flex; user-select: none;
+  }
+  .kern-letter {
+    display: inline-block; cursor: ew-resize; position: relative;
+    transition: color 0.2s;
+  }
+  .kern-letter:hover { color: var(--accent); }
+  .kern-letter.active { color: var(--accent3); }
+  .kern-slider-row {
+    display: flex; align-items: center; justify-content: center; gap: 1rem;
+  }
+  .kern-slider-row label { font-size: 0.82rem; color: var(--text-dim); font-weight: 500; }
+  .kern-slider-row input[type="range"] {
+    width: 200px; accent-color: var(--accent);
+  }
+  .kern-value {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+    color: var(--accent); min-width: 50px;
+  }
+
+  /* ── TYPE HIERARCHY DEMO ── */
+  .hierarchy-demo {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 3rem; margin-bottom: 2rem;
+  }
+  .hier-row {
+    display: flex; align-items: baseline; gap: 2rem;
+    padding: 1.25rem 0; border-bottom: 1px solid var(--border);
+  }
+  .hier-row:last-child { border-bottom: none; }
+  .hier-label {
+    min-width: 80px; font-size: 0.68rem; font-weight: 600;
+    color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase;
+  }
+  .hier-sample { flex: 1; }
+  .hier-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem; color: var(--text-dim);
+    min-width: 120px; text-align: right;
+  }
+  .h-display { font-size: 3.5rem; font-weight: 900; letter-spacing: -2px; line-height: 1.1; }
+  .h-h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -1.5px; line-height: 1.15; }
+  .h-h2 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.5px; line-height: 1.25; }
+  .h-h3 { font-size: 1.25rem; font-weight: 600; line-height: 1.35; }
+  .h-body { font-size: 1rem; font-weight: 400; color: var(--text-dim); line-height: 1.7; }
+  .h-caption { font-size: 0.82rem; font-weight: 400; color: var(--text-dim); line-height: 1.5; }
+
+  /* ── TOOL COMPARISON ── */
+  .compare-table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .compare-table th {
+    padding: 1rem 1.5rem; text-align: left; font-size: 0.72rem;
+    font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--text-dim); background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-table td {
+    padding: 1rem 1.5rem; font-size: 0.88rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table .tool-name {
+    font-weight: 700; display: flex; align-items: center; gap: 8px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem; text-align: center;
+    color: var(--text-dim); font-size: 0.82rem;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav ul { display: none; }
+    .bool-panel.active { grid-template-columns: 1fr; gap: 2rem; }
+    .logo-grid { grid-template-columns: 1fr; }
+    .type-demo-grid { grid-template-columns: 1fr; }
+    .tricks-grid { grid-template-columns: 1fr; }
+    .shortcut-row { flex-direction: column; }
+    section { padding: 4rem 1.25rem 3rem; }
+  }
+
+  /* ── ANIMATION ── */
+  .fade-in { opacity: 0; transform: translateY(20px); transition: all 0.6s ease; }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── Pro-tip callout ── */
+  .pro-tip {
+    background: rgba(108,92,231,0.06);
+    border: 1px solid rgba(108,92,231,0.15);
+    border-radius: var(--radius-sm);
+    padding: 1.25rem 1.5rem;
+    margin-top: 1.5rem;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .pro-tip .pt-icon {
+    background: var(--accent); color: #fff; font-size: 0.7rem;
+    font-weight: 800; padding: 3px 8px; border-radius: 5px;
+    white-space: nowrap; margin-top: 2px;
+  }
+  .pro-tip p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ NAV ═══════════════════ -->
+<nav>
+  <div class="inner">
+    <div class="logo">
+      <svg viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="24" height="24" rx="6" stroke="#6c5ce7" stroke-width="2.5"/><path d="M9 14h10M14 9v10" stroke="#6c5ce7" stroke-width="2" stroke-linecap="round"/></svg>
+      Vector Mastery
+    </div>
+    <ul>
+      <li><a href="#booleans" class="active">Booleans</a></li>
+      <li><a href="#tricks">Tricks</a></li>
+      <li><a href="#logo">Logo Design</a></li>
+      <li><a href="#typography">Typography</a></li>
+      <li><a href="#compare">Figma vs Ai</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<section id="hero">
+  <div class="hero-badge">Interactive Learning Guide</div>
+  <h1 class="section-title">Master the Geometry<br>Behind Great Design</h1>
+  <p class="section-sub">Boolean operations, shape tricks, logo principles, and typography fundamentals — everything you need for Figma by day and Illustrator by night.</p>
+  <div class="hero-tools">
+    <div class="tool"><div class="dot figma"></div>Figma</div>
+    <div class="tool"><div class="dot ai"></div>Illustrator</div>
+  </div>
+  <div class="scroll-hint">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10l6 6 6-6"/></svg>
+    Scroll to explore
+  </div>
+</section>
+
+<!-- ═══════════════════ BOOLEANS ═══════════════════ -->
+<section id="booleans" class="fade-in">
+  <div class="section-label">01 — Boolean Operations</div>
+  <h2 class="section-title">Shape Math</h2>
+  <p class="section-sub">Four operations that combine shapes. Think of it as set theory applied to geometry — every icon and logo you admire was likely built with these.</p>
+
+  <div class="bool-demo">
+    <div class="bool-tabs">
+      <button class="bool-tab active" data-tab="union">Union</button>
+      <button class="bool-tab" data-tab="subtract">Subtract</button>
+      <button class="bool-tab" data-tab="intersect">Intersect</button>
+      <button class="bool-tab" data-tab="exclude">Exclude</button>
+    </div>
+
+    <!-- UNION -->
+    <div class="bool-panel active" id="panel-union">
+      <div class="bool-visual">
+        <svg viewBox="0 0 300 220">
+          <defs>
+            <linearGradient id="gu" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6c5ce7"/><stop offset="100%" stop-color="#a29bfe"/></linearGradient>
+          </defs>
+          <!-- ghost outlines -->
+          <circle cx="115" cy="110" r="65" fill="none" stroke="#6c5ce730" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <circle cx="185" cy="110" r="65" fill="none" stroke="#6c5ce730" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <!-- merged shape -->
+          <clipPath id="cu"><circle cx="115" cy="110" r="65"/><circle cx="185" cy="110" r="65"/></clipPath>
+          <rect x="50" y="45" width="200" height="130" fill="url(#gu)" clip-path="url(#cu)" rx="0"/>
+          <!-- label -->
+          <text x="150" y="200" text-anchor="middle" fill="#8888a0" font-size="12" font-family="Inter">A ∪ B — Keep everything</text>
+        </svg>
+      </div>
+      <div class="bool-info">
+        <h3>Union <span style="color:var(--text-dim);font-weight:400;font-size:0.9rem">/ Unite / Add</span></h3>
+        <p>Merges all selected shapes into one combined shape. The outer boundary of every shape becomes the new outline. This is your go-to for building complex icons from simple primitives.</p>
+        <p><strong style="color:var(--text)">Use case:</strong> Combine a rectangle and a circle to create a pill/capsule shape, or merge overlapping forms to build a custom icon silhouette.</p>
+        <div class="shortcut-row">
+          <div class="shortcut-item">
+            <span class="shortcut-label">Figma</span>
+            <div class="shortcut-keys"><span class="key">⌘</span><span class="key">⌥</span><span class="key">U</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-label">Illustrator</span>
+            <div class="shortcut-keys"><span class="key">Pathfinder</span><span class="key">Unite</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBTRACT -->
+    <div class="bool-panel" id="panel-subtract">
+      <div class="bool-visual">
+        <svg viewBox="0 0 300 220">
+          <defs>
+            <linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00cec9"/><stop offset="100%" stop-color="#81ecec"/></linearGradient>
+            <mask id="ms">
+              <rect width="300" height="220" fill="white"/>
+              <circle cx="185" cy="110" r="65" fill="black"/>
+            </mask>
+          </defs>
+          <circle cx="185" cy="110" r="65" fill="none" stroke="#00cec930" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <circle cx="115" cy="110" r="65" fill="url(#gs)" mask="url(#ms)"/>
+          <text x="150" y="200" text-anchor="middle" fill="#8888a0" font-size="12" font-family="Inter">A − B — Cut the front shape out</text>
+        </svg>
+      </div>
+      <div class="bool-info">
+        <h3>Subtract <span style="color:var(--text-dim);font-weight:400;font-size:0.9rem">/ Minus Front / Difference</span></h3>
+        <p>The top shape cuts away from the bottom shape like a cookie cutter. Whatever overlaps is removed, keeping only the remaining part of the back shape.</p>
+        <p><strong style="color:var(--text)">Use case:</strong> Cut a circle from a rectangle to create a crescent moon, or punch holes in shapes for icons like a search magnifying glass.</p>
+        <div class="shortcut-row">
+          <div class="shortcut-item">
+            <span class="shortcut-label">Figma</span>
+            <div class="shortcut-keys"><span class="key">⌘</span><span class="key">⌥</span><span class="key">S</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-label">Illustrator</span>
+            <div class="shortcut-keys"><span class="key">Pathfinder</span><span class="key">Minus Front</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTERSECT -->
+    <div class="bool-panel" id="panel-intersect">
+      <div class="bool-visual">
+        <svg viewBox="0 0 300 220">
+          <defs>
+            <linearGradient id="gi" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fd79a8"/><stop offset="100%" stop-color="#fab1a0"/></linearGradient>
+            <clipPath id="ci1"><circle cx="115" cy="110" r="65"/></clipPath>
+            <clipPath id="ci2"><circle cx="185" cy="110" r="65"/></clipPath>
+          </defs>
+          <circle cx="115" cy="110" r="65" fill="none" stroke="#fd79a830" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <circle cx="185" cy="110" r="65" fill="none" stroke="#fd79a830" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <g clip-path="url(#ci1)"><circle cx="185" cy="110" r="65" fill="url(#gi)"/></g>
+          <text x="150" y="200" text-anchor="middle" fill="#8888a0" font-size="12" font-family="Inter">A ∩ B — Keep only the overlap</text>
+        </svg>
+      </div>
+      <div class="bool-info">
+        <h3>Intersect <span style="color:var(--text-dim);font-weight:400;font-size:0.9rem">/ Intersection</span></h3>
+        <p>Keeps only the area where all shapes overlap. Everything outside the shared zone disappears. Think Venn diagram — only the middle part survives.</p>
+        <p><strong style="color:var(--text)">Use case:</strong> Create leaf shapes by intersecting two circles, or build complex symmetric patterns from overlapping geometry.</p>
+        <div class="shortcut-row">
+          <div class="shortcut-item">
+            <span class="shortcut-label">Figma</span>
+            <div class="shortcut-keys"><span class="key">⌘</span><span class="key">⌥</span><span class="key">I</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-label">Illustrator</span>
+            <div class="shortcut-keys"><span class="key">Pathfinder</span><span class="key">Intersect</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXCLUDE -->
+    <div class="bool-panel" id="panel-exclude">
+      <div class="bool-visual">
+        <svg viewBox="0 0 300 220">
+          <defs>
+            <linearGradient id="ge" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fdcb6e"/><stop offset="100%" stop-color="#ffeaa7"/></linearGradient>
+            <mask id="me">
+              <rect width="300" height="220" fill="white"/>
+              <g><clipPath id="ce1"><circle cx="115" cy="110" r="65"/></clipPath><circle cx="185" cy="110" r="65" fill="black" clip-path="url(#ce1)"/></g>
+            </mask>
+          </defs>
+          <clipPath id="ceu"><circle cx="115" cy="110" r="65"/><circle cx="185" cy="110" r="65"/></clipPath>
+          <rect x="50" y="45" width="200" height="130" fill="url(#ge)" clip-path="url(#ceu)" mask="url(#me)"/>
+          <text x="150" y="200" text-anchor="middle" fill="#8888a0" font-size="12" font-family="Inter">A ⊕ B — Keep everything except the overlap</text>
+        </svg>
+      </div>
+      <div class="bool-info">
+        <h3>Exclude <span style="color:var(--text-dim);font-weight:400;font-size:0.9rem">/ XOR</span></h3>
+        <p>The opposite of intersect — keeps everything except where the shapes overlap. The shared zone becomes empty. Useful for creating interesting negative space effects.</p>
+        <p><strong style="color:var(--text)">Use case:</strong> Create ring shapes, frame effects, or logos that play with positive and negative space.</p>
+        <div class="shortcut-row">
+          <div class="shortcut-item">
+            <span class="shortcut-label">Figma</span>
+            <div class="shortcut-keys"><span class="key">⌘</span><span class="key">⌥</span><span class="key">E</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-label">Illustrator</span>
+            <div class="shortcut-keys"><span class="key">Pathfinder</span><span class="key">Exclude</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pro-tip">
+    <span class="pt-icon">PRO TIP</span>
+    <p><strong style="color:var(--text)">Figma's booleans are non-destructive.</strong> You can still select and move individual layers inside a boolean group. In Illustrator, use <strong style="color:var(--text)">⌘+Z</strong> immediately or use the Shape Builder Tool (Shift+M) for more flexible, visual merging.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════ GEOMETRY TRICKS ═══════════════════ -->
+<section id="tricks" class="fade-in">
+  <div class="section-label">02 — Geometry Tricks</div>
+  <h2 class="section-title">Beyond the Basics</h2>
+  <p class="section-sub">Techniques the tutorials skip. These will speed up your workflow and unlock shapes you didn't think were possible with simple geometry.</p>
+
+  <div class="tricks-grid">
+    <div class="trick-card">
+      <div class="trick-num">01</div>
+      <div class="trick-content">
+        <h4>Shape Builder (Shift+M) in Illustrator</h4>
+        <p>Draw overlapping circles, rectangles, and polygons. Select all, then press Shift+M. Click to merge regions, hold Alt/Option and click to subtract. Far more intuitive than Pathfinder for complex shapes.</p>
+        <div class="tag-row"><span class="tag ai">Illustrator</span></div>
+      </div>
+    </div>
+    <div class="trick-card">
+      <div class="trick-num">02</div>
+      <div class="trick-content">
+        <h4>Vector Networks in Figma</h4>
+        <p>Unlike Illustrator's single-direction paths, Figma's vector nodes can branch in multiple directions. Draw a node and pull paths in any direction — perfect for complex line illustrations without separate paths.</p>
+        <div class="tag-row"><span class="tag figma">Figma</span></div>
+      </div>
+    </div>
+    <div class="trick-card">
+      <div class="trick-num">03</div>
+      <div class="trick-content">
+        <h4>Shift-Constrain for Clean Angles</h4>
+        <p>Hold Shift while drawing or rotating to snap to 45° increments. This gives you perfectly horizontal, vertical, and diagonal lines every time. Works in both tools.</p>
+        <div class="tag-row"><span class="tag both">Both</span></div>
+      </div>
+    </div>
+    <div class="trick-card">
+      <div class="trick-num">04</div>
+      <div class="trick-content">
+        <h4>Flatten then Simplify Paths</h4>
+        <p>After boolean operations, paths often have too many anchor points. In Illustrator: Object → Path → Simplify. In Figma: Flatten Selection (⌘+E) then manually remove extra nodes. Fewer points = cleaner shapes.</p>
+        <div class="tag-row"><span class="tag both">Both</span></div>
+      </div>
+    </div>
+    <div class="trick-card">
+      <div class="trick-num">05</div>
+      <div class="trick-content">
+        <h4>Divide & Trim (Pathfinder Extras)</h4>
+        <p>Illustrator's Pathfinder has more than just the big four. <strong>Divide</strong> breaks overlapping shapes into separate pieces. <strong>Trim</strong> removes the hidden parts. Great for sticker-style illustrations.</p>
+        <div class="tag-row"><span class="tag ai">Illustrator</span></div>
+      </div>
+    </div>
+    <div class="trick-card">
+      <div class="trick-num">06</div>
+      <div class="trick-content">
+        <h4>Outline Stroke → Boolean</h4>
+        <p>Convert a stroke to a filled shape (Object → Expand/Outline Stroke in Ai, or Outline Stroke in Figma). Now you can use boolean operations on it — perfect for making custom letterforms and logo marks.</p>
+        <div class="tag-row"><span class="tag both">Both</span></div>
+      </div>
+    </div>
+    <div class="trick-card">
+      <div class="trick-num">07</div>
+      <div class="trick-content">
+        <h4>Radial Repeat for Mandalas</h4>
+        <p>Draw one shape, then use Figma's new Repeat Transforms or Illustrator's Rotate Copy (rotate, copy, ⌘+D to repeat). Combine with booleans for intricate symmetric patterns and logos.</p>
+        <div class="tag-row"><span class="tag both">Both</span></div>
+      </div>
+    </div>
+    <div class="trick-card">
+      <div class="trick-num">08</div>
+      <div class="trick-content">
+        <h4>Offset Path for Depth</h4>
+        <p>In Illustrator: Object → Path → Offset Path creates a scaled copy at a set distance. Use this to add outlines, shadows, or layered depth effects to logos and icons without manually resizing.</p>
+        <div class="tag-row"><span class="tag ai">Illustrator</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ LOGO DESIGN ═══════════════════ -->
+<section id="logo" class="fade-in">
+  <div class="section-label">03 — Logo & Brand Design</div>
+  <h2 class="section-title">Principles That Stick</h2>
+  <p class="section-sub">Great logos aren't accidents. They follow principles rooted in geometry, psychology, and restraint.</p>
+
+  <div class="logo-grid">
+    <div class="logo-principle">
+      <div class="lp-icon" style="background:rgba(108,92,231,0.1)">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="12" stroke="#6c5ce7" stroke-width="2.5"/></svg>
+      </div>
+      <h4>Simplicity</h4>
+      <p>The best logos work at 16px favicon size and on a billboard. Strip away everything that isn't essential. If a child can draw it from memory, you're on the right track.</p>
+    </div>
+    <div class="logo-principle">
+      <div class="lp-icon" style="background:rgba(0,206,201,0.1)">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect x="8" y="8" width="20" height="20" rx="4" stroke="#00cec9" stroke-width="2.5"/><circle cx="18" cy="18" r="5" stroke="#00cec9" stroke-width="2"/></svg>
+      </div>
+      <h4>Scalability</h4>
+      <p>Design in vector, test at every size. Your logo must work as a monochrome stamp, an app icon, a letterhead, and a sign. Avoid thin lines and tiny details that disappear at small sizes.</p>
+    </div>
+    <div class="logo-principle">
+      <div class="lp-icon" style="background:rgba(253,121,168,0.1)">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><path d="M18 8v20M8 18h20" stroke="#fd79a8" stroke-width="2.5" stroke-linecap="round"/></svg>
+      </div>
+      <h4>Geometry Grids</h4>
+      <p>Build on a grid system. Use circles, golden ratios, and consistent proportions. Brands like Apple, Twitter, and Pepsi all built their logos on geometric foundations.</p>
+    </div>
+    <div class="logo-principle">
+      <div class="lp-icon" style="background:rgba(253,203,110,0.1)">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect x="8" y="14" width="20" height="8" rx="4" fill="#fdcb6e" opacity="0.3"/><rect x="8" y="14" width="20" height="8" rx="4" stroke="#fdcb6e" stroke-width="2"/></svg>
+      </div>
+      <h4>Negative Space</h4>
+      <p>The space around and within your logo is a design tool. The FedEx arrow, the NBC peacock — negative space creates memorable, clever marks that reward a closer look.</p>
+    </div>
+    <div class="logo-principle">
+      <div class="lp-icon" style="background:rgba(162,89,255,0.1)">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="14" cy="18" r="8" stroke="#a259ff" stroke-width="2.5"/><circle cx="22" cy="18" r="8" stroke="#a259ff" stroke-width="2.5"/></svg>
+      </div>
+      <h4>Two Colors Max</h4>
+      <p>95% of brands use no more than two colors. A signature color can boost recognition by up to 80%. Start in black and white — if it doesn't work mono, color won't save it.</p>
+    </div>
+    <div class="logo-principle">
+      <div class="lp-icon" style="background:rgba(255,154,0,0.1)">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><path d="M10 26L18 10l8 16" stroke="#ff9a00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h4>Timelessness</h4>
+      <p>Don't chase trends. Gradients, 3D effects, and drop shadows date quickly. Choose geometry that truthfully represents the brand and will still feel relevant in 20 years.</p>
+    </div>
+  </div>
+
+  <!-- Shape Psychology -->
+  <h3 style="margin-top:3.5rem; font-size:1.5rem; font-weight:800; letter-spacing:-0.5px; margin-bottom:0.5rem;">Shape Psychology in Branding</h3>
+  <p style="color:var(--text-dim); font-size:0.92rem; max-width:550px;">Every geometric shape carries subconscious meaning. Choose intentionally.</p>
+
+  <div class="shapes-row">
+    <div class="shape-card">
+      <svg viewBox="0 0 56 56"><circle cx="28" cy="28" r="22" fill="none" stroke="#6c5ce7" stroke-width="2.5"/></svg>
+      <h5>Circle</h5>
+      <p>Unity, community, wholeness, protection, femininity</p>
+    </div>
+    <div class="shape-card">
+      <svg viewBox="0 0 56 56"><rect x="8" y="8" width="40" height="40" rx="3" fill="none" stroke="#00cec9" stroke-width="2.5"/></svg>
+      <h5>Square</h5>
+      <p>Stability, trust, order, professionalism, strength</p>
+    </div>
+    <div class="shape-card">
+      <svg viewBox="0 0 56 56"><polygon points="28,6 50,48 6,48" fill="none" stroke="#fd79a8" stroke-width="2.5" stroke-linejoin="round"/></svg>
+      <h5>Triangle ▲</h5>
+      <p>Power, ambition, direction, energy, aspiration</p>
+    </div>
+    <div class="shape-card">
+      <svg viewBox="0 0 56 56"><line x1="4" y1="28" x2="52" y2="28" stroke="#fdcb6e" stroke-width="2.5" stroke-linecap="round"/></svg>
+      <h5>Line</h5>
+      <p>Speed, precision, modernity, simplicity, direction</p>
+    </div>
+    <div class="shape-card">
+      <svg viewBox="0 0 56 56"><path d="M28 4C14 4 4 16 4 28s10 24 24 24c6-8 8-16 8-24S34 12 28 4z" fill="none" stroke="#a259ff" stroke-width="2.5"/></svg>
+      <h5>Organic</h5>
+      <p>Natural, friendly, approachable, human, warmth</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ TYPOGRAPHY ═══════════════════ -->
+<section id="typography" class="fade-in">
+  <div class="section-label">04 — Typography</div>
+  <h2 class="section-title">Type Demystified</h2>
+  <p class="section-sub">Typography spacing separates amateur work from professional design. Here are the three pillars, explained visually.</p>
+
+  <div class="type-demo-grid">
+    <!-- KERNING -->
+    <div class="type-card">
+      <div class="visual">
+        <svg viewBox="0 0 260 140" style="width:85%">
+          <text x="30" y="85" font-family="Inter" font-weight="800" font-size="56" fill="#e8e8ed">A</text>
+          <text x="72" y="85" font-family="Inter" font-weight="800" font-size="56" fill="#e8e8ed">V</text>
+          <line x1="62" y1="30" x2="62" y2="100" stroke="#fd79a8" stroke-width="1.5" stroke-dasharray="3 2"/>
+          <line x1="82" y1="30" x2="82" y2="100" stroke="#fd79a8" stroke-width="1.5" stroke-dasharray="3 2"/>
+          <path d="M62 110h20" stroke="#fd79a8" stroke-width="1.5"/>
+          <path d="M62 110l3-3M62 110l3 3M82 110l-3-3M82 110l-3 3" stroke="#fd79a8" stroke-width="1.5"/>
+          <text x="130" y="85" font-family="Inter" font-weight="800" font-size="56" fill="#6c5ce7">A</text>
+          <text x="162" y="85" font-family="Inter" font-weight="800" font-size="56" fill="#6c5ce7">V</text>
+          <text x="72" y="132" font-family="Inter" font-size="10" fill="#8888a0" text-anchor="middle">Before</text>
+          <text x="162" y="132" font-family="Inter" font-size="10" fill="#6c5ce7" text-anchor="middle">After kerning</text>
+        </svg>
+      </div>
+      <div class="info">
+        <h4>Kerning</h4>
+        <p>Adjusts space between <strong>individual letter pairs</strong>. Critical for headlines, logos, and large type. Watch pairs like AV, WA, To, and LT — they always need manual attention.</p>
+      </div>
+    </div>
+
+    <!-- TRACKING -->
+    <div class="type-card">
+      <div class="visual">
+        <svg viewBox="0 0 260 140" style="width:85%">
+          <text x="20" y="55" font-family="Inter" font-weight="700" font-size="24" fill="#8888a0" letter-spacing="0">TIGHT</text>
+          <text x="20" y="95" font-family="Inter" font-weight="700" font-size="24" fill="#e8e8ed" letter-spacing="6">LOOSE</text>
+          <text x="20" y="128" font-family="Inter" font-weight="700" font-size="24" fill="#00cec9" letter-spacing="14">WIDE</text>
+          <line x1="150" y1="40" x2="150" y2="60" stroke="#8888a030" stroke-width="1"/>
+          <line x1="170" y1="80" x2="170" y2="100" stroke="#e8e8ed30" stroke-width="1"/>
+          <line x1="200" y1="113" x2="200" y2="133" stroke="#00cec930" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="info">
+        <h4>Tracking</h4>
+        <p>Adjusts spacing <strong>uniformly across all letters</strong> in a text block. Tight tracking feels formal and dense. Wide tracking feels open and airy — great for all-caps labels and navigation.</p>
+      </div>
+    </div>
+
+    <!-- LEADING -->
+    <div class="type-card">
+      <div class="visual">
+        <svg viewBox="0 0 260 140" style="width:85%">
+          <text x="20" y="35" font-family="Inter" font-size="13" fill="#8888a0">Line one of text</text>
+          <text x="20" y="50" font-family="Inter" font-size="13" fill="#8888a0">Line two cramped</text>
+          <line x1="180" y1="28" x2="180" y2="53" stroke="#fd79a8" stroke-width="1" stroke-dasharray="2 2"/>
+          <text x="190" y="44" font-family="JetBrains Mono" font-size="9" fill="#fd79a8">100%</text>
+
+          <text x="20" y="85" font-family="Inter" font-size="13" fill="#e8e8ed">Line one of text</text>
+          <text x="20" y="108" font-family="Inter" font-size="13" fill="#e8e8ed">Line two balanced</text>
+          <line x1="180" y1="78" x2="180" y2="111" stroke="#6c5ce7" stroke-width="1" stroke-dasharray="2 2"/>
+          <text x="190" y="98" font-family="JetBrains Mono" font-size="9" fill="#6c5ce7">150%</text>
+        </svg>
+      </div>
+      <div class="info">
+        <h4>Leading</h4>
+        <p>The <strong>vertical space between lines</strong>. The sweet spot is around 120–150% of the font size. Too tight makes text claustrophobic; too loose breaks reading rhythm.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Kerning Demo -->
+  <h3 style="font-size:1.3rem; font-weight:700; margin-bottom:1rem;">Try It: Interactive Kerning</h3>
+  <div class="kern-demo">
+    <div class="kern-word" id="kernWord">
+      <span class="kern-letter" data-index="0">T</span><span class="kern-letter active" data-index="1" id="kernTarget">y</span><span class="kern-letter" data-index="2">p</span><span class="kern-letter" data-index="3">e</span>
+    </div>
+    <div class="kern-slider-row">
+      <label>Kerning between T–y:</label>
+      <input type="range" id="kernSlider" min="-20" max="20" value="-4">
+      <span class="kern-value" id="kernVal">-4px</span>
+    </div>
+    <div class="pro-tip" style="text-align:left; margin-top:1.5rem;">
+      <span class="pt-icon">TRY</span>
+      <p>Drag the slider to see how kerning affects readability. Notice how "Ty" needs to be pulled closer (negative value) because the T's crossbar creates visual space above the y.</p>
+    </div>
+  </div>
+
+  <!-- Type Hierarchy -->
+  <h3 style="font-size:1.3rem; font-weight:700; margin-bottom:1rem;">Type Hierarchy Scale</h3>
+  <div class="hierarchy-demo">
+    <div class="hier-row">
+      <span class="hier-label">Display</span>
+      <span class="hier-sample h-display">Headlines</span>
+      <span class="hier-meta">56px / 900</span>
+    </div>
+    <div class="hier-row">
+      <span class="hier-label">H1</span>
+      <span class="hier-sample h-h1">Page Title</span>
+      <span class="hier-meta">40px / 800</span>
+    </div>
+    <div class="hier-row">
+      <span class="hier-label">H2</span>
+      <span class="hier-sample h-h2">Section Header</span>
+      <span class="hier-meta">28px / 700</span>
+    </div>
+    <div class="hier-row">
+      <span class="hier-label">H3</span>
+      <span class="hier-sample h-h3">Subsection Title</span>
+      <span class="hier-meta">20px / 600</span>
+    </div>
+    <div class="hier-row">
+      <span class="hier-label">Body</span>
+      <span class="hier-sample h-body">This is body text that makes up the bulk of your content. It should feel effortless to read.</span>
+      <span class="hier-meta">16px / 400</span>
+    </div>
+    <div class="hier-row">
+      <span class="hier-label">Caption</span>
+      <span class="hier-sample h-caption">Small supporting text for labels, timestamps, and metadata</span>
+      <span class="hier-meta">13px / 400</span>
+    </div>
+  </div>
+
+  <div class="pro-tip">
+    <span class="pt-icon">RULE</span>
+    <p><strong style="color:var(--text)">The 120% leading rule:</strong> Set your line height to 120% of the font size as a starting point. For body text at 16px, use ~19px leading. For headings, tighten it to 100–110% since large text needs less breathing room.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════ COMPARISON ═══════════════════ -->
+<section id="compare" class="fade-in">
+  <div class="section-label">05 — Tool Comparison</div>
+  <h2 class="section-title">Figma vs Illustrator</h2>
+  <p class="section-sub">They call the same operations by different names. Here's your translation cheat sheet.</p>
+
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th style="width:28%">Operation</th>
+        <th style="width:36%"><span style="color:var(--figma)">●</span> Figma</th>
+        <th style="width:36%"><span style="color:var(--illustrator)">●</span> Illustrator</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Merge shapes</strong></td><td>Union Selection (⌘⌥U)</td><td>Pathfinder → Unite</td></tr>
+      <tr><td><strong>Cut shape</strong></td><td>Subtract Selection (⌘⌥S)</td><td>Pathfinder → Minus Front</td></tr>
+      <tr><td><strong>Overlap only</strong></td><td>Intersect Selection (⌘⌥I)</td><td>Pathfinder → Intersect</td></tr>
+      <tr><td><strong>Remove overlap</strong></td><td>Exclude Selection (⌘⌥E)</td><td>Pathfinder → Exclude</td></tr>
+      <tr><td><strong>Visual merge</strong></td><td>Shape Builder (new!)</td><td>Shape Builder Tool (⇧M)</td></tr>
+      <tr><td><strong>Flatten to path</strong></td><td>Flatten Selection (⌘E)</td><td>Object → Expand</td></tr>
+      <tr><td><strong>Outline stroke</strong></td><td>Outline Stroke</td><td>Object → Path → Outline Stroke</td></tr>
+      <tr><td><strong>Simplify path</strong></td><td>Manual node removal</td><td>Object → Path → Simplify</td></tr>
+      <tr><td><strong>Non-destructive?</strong></td><td style="color:var(--accent2)">✓ Yes, always</td><td>Only with Compound Shapes</td></tr>
+      <tr><td><strong>Vector networks</strong></td><td style="color:var(--accent2)">✓ Multi-direction paths</td><td>Single-direction paths only</td></tr>
+    </tbody>
+  </table>
+
+  <div class="pro-tip" style="margin-top:1.5rem;">
+    <span class="pt-icon">WORKFLOW</span>
+    <p><strong style="color:var(--text)">Day/Night strategy:</strong> Use Figma for rapid iteration and UI work during the day — its non-destructive booleans are forgiving. Switch to Illustrator at night for production-ready illustrations — its Pathfinder suite (Divide, Trim, Merge, Crop, Outline, Minus Back) gives you six extra operations Figma doesn't have.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer>
+  <p>Built for Sherifdeen — Vector Mastery Guide</p>
+</footer>
+
+<!-- ═══════════════════ SCRIPTS ═══════════════════ -->
+<script>
+  // Boolean tabs
+  document.querySelectorAll('.bool-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.bool-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.bool-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Kerning slider
+  const kernSlider = document.getElementById('kernSlider');
+  const kernTarget = document.getElementById('kernTarget');
+  const kernVal = document.getElementById('kernVal');
+  kernSlider.addEventListener('input', () => {
+    const v = kernSlider.value;
+    kernTarget.style.marginLeft = v + 'px';
+    kernVal.textContent = v + 'px';
+  });
+  // init
+  kernTarget.style.marginLeft = '-4px';
+
+  // Kerning letter click
+  document.querySelectorAll('.kern-letter').forEach(letter => {
+    letter.addEventListener('click', () => {
+      document.querySelectorAll('.kern-letter').forEach(l => l.classList.remove('active'));
+      letter.classList.add('active');
+    });
+  });
+
+  // Scroll fade-in
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Nav active state
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('nav ul li a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 200) current = s.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+  });
+</script>
+</body>
+</html>

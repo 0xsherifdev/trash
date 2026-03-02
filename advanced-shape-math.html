@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Shape Math — Complex Boolean & Geometry</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  :root {
+    --bg: #08080a; --s1: #111115; --s2: #18181e; --s3: #222230;
+    --bd: #2a2a35; --tx: #e4e4f0; --dim: #7a7a95; --dim2: #55556a;
+    --v: #7c3aed; --v2: #a78bfa; --v3: #c4b5fd;
+    --cy: #06b6d4; --cy2: #67e8f9;
+    --pk: #ec4899; --pk2: #f9a8d4;
+    --or: #f59e0b; --or2: #fcd34d;
+    --gn: #10b981; --gn2: #6ee7b7;
+    --rd: #ef4444;
+    --r: 14px; --r2: 10px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);line-height:1.7;-webkit-font-smoothing:antialiased}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(24px) saturate(1.6);background:rgba(8,8,10,.78);border-bottom:1px solid var(--bd);height:56px;display:flex;align-items:center;padding:0 2rem}
+  nav .inner{max-width:1100px;margin:auto;width:100%;display:flex;align-items:center;justify-content:space-between}
+  nav .logo{font-weight:800;font-size:1rem;display:flex;align-items:center;gap:8px;letter-spacing:-.3px}
+  nav .logo .dot{width:8px;height:8px;border-radius:50%;background:var(--v)}
+  nav .pills{display:flex;gap:4px}
+  nav .pills a{text-decoration:none;color:var(--dim);font-size:.76rem;font-weight:600;padding:5px 12px;border-radius:7px;transition:.2s}
+  nav .pills a:hover{color:var(--tx);background:var(--s2)}
+
+  /* LAYOUT */
+  .wrap{max-width:1100px;margin:auto;padding:0 2rem}
+  section{padding:5rem 0 3rem}
+  .label{font-size:.65rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--v2);margin-bottom:.6rem}
+  h2{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;letter-spacing:-1.2px;line-height:1.12;margin-bottom:.6rem}
+  .sub{font-size:.95rem;color:var(--dim);max-width:560px;margin-bottom:2.5rem}
+
+  /* HERO */
+  #hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;padding-top:56px}
+  #hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 40% at 50% 45%,rgba(124,58,237,.1),transparent 70%);pointer-events:none}
+  .hero-chip{font-size:.68rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--v2);border:1px solid rgba(124,58,237,.25);padding:5px 16px;border-radius:100px;background:rgba(124,58,237,.05);margin-bottom:1.8rem;display:inline-block}
+  #hero h1{font-size:clamp(2.2rem,5.5vw,4rem);font-weight:900;letter-spacing:-2px;line-height:1.08;margin-bottom:1rem;max-width:700px}
+  #hero .sub{margin-left:auto;margin-right:auto;max-width:500px}
+
+  /* STEP CARDS — the main teaching unit */
+  .build{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:2rem}
+  .build-header{padding:1.5rem 2rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:1rem}
+  .build-num{font-size:1.8rem;font-weight:900;color:var(--s3);-webkit-text-stroke:1px var(--bd);line-height:1}
+  .build-header h3{font-size:1.1rem;font-weight:700;letter-spacing:-.3px}
+  .build-header .difficulty{font-size:.65rem;font-weight:700;padding:3px 9px;border-radius:5px;margin-left:auto}
+  .diff-med{background:rgba(245,158,11,.1);color:var(--or)}
+  .diff-hard{background:rgba(239,68,68,.1);color:var(--rd)}
+  .diff-expert{background:rgba(124,58,237,.12);color:var(--v2)}
+
+  .build-body{display:grid;grid-template-columns:1fr 1fr;min-height:0}
+  .build-visual{padding:2rem;display:flex;align-items:center;justify-content:center;background:var(--s2);position:relative;min-height:320px}
+  .build-visual svg{width:100%;max-width:380px;height:auto}
+  .build-explain{padding:2rem;display:flex;flex-direction:column;justify-content:center;gap:.75rem}
+  .build-explain p{font-size:.88rem;color:var(--dim);line-height:1.7}
+  .build-explain strong{color:var(--tx)}
+
+  /* Step indicators inside visuals */
+  .step-row{display:flex;gap:6px;margin-top:.75rem}
+  .step-btn{padding:5px 14px;border-radius:7px;font-size:.75rem;font-weight:600;border:1px solid var(--bd);background:var(--s2);color:var(--dim);cursor:pointer;transition:.2s}
+  .step-btn:hover,.step-btn.active{background:var(--v);border-color:var(--v);color:#fff}
+
+  /* Operation chain */
+  .op-chain{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:.5rem 0}
+  .op{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:600;padding:4px 10px;border-radius:6px}
+  .op-union{background:rgba(124,58,237,.12);color:var(--v2)}
+  .op-sub{background:rgba(6,182,212,.12);color:var(--cy2)}
+  .op-int{background:rgba(236,72,153,.12);color:var(--pk2)}
+  .op-exc{background:rgba(245,158,11,.12);color:var(--or2)}
+  .op-div{background:rgba(16,185,129,.12);color:var(--gn2)}
+  .op-arrow{color:var(--dim2);font-size:.8rem}
+
+  /* Concept cards */
+  .concepts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.25rem}
+  .concept{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:2rem;transition:.3s}
+  .concept:hover{border-color:rgba(124,58,237,.3);transform:translateY(-3px)}
+  .concept h4{font-size:1.05rem;font-weight:700;margin-bottom:.4rem}
+  .concept p{font-size:.85rem;color:var(--dim);line-height:1.65}
+  .concept-vis{width:100%;height:140px;background:var(--s2);border-radius:var(--r2);margin-bottom:1.25rem;display:flex;align-items:center;justify-content:center;overflow:hidden}
+
+  /* Winding rule demo */
+  .winding-demo{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem}
+  .winding-card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:2rem;text-align:center}
+  .winding-card svg{margin-bottom:1rem}
+  .winding-card h4{font-size:1rem;font-weight:700;margin-bottom:.3rem}
+  .winding-card p{font-size:.83rem;color:var(--dim);line-height:1.6}
+  .winding-card code{font-family:'JetBrains Mono',monospace;font-size:.75rem;background:var(--s2);padding:2px 8px;border-radius:4px;color:var(--cy2)}
+
+  /* Pro tip */
+  .tip{background:rgba(124,58,237,.04);border:1px solid rgba(124,58,237,.12);border-radius:var(--r2);padding:1.2rem 1.5rem;display:flex;gap:12px;align-items:flex-start;margin:1.5rem 0}
+  .tip-badge{background:var(--v);color:#fff;font-size:.65rem;font-weight:800;padding:3px 8px;border-radius:5px;white-space:nowrap;margin-top:2px}
+  .tip p{font-size:.85rem;color:var(--dim);line-height:1.65}
+
+  /* Interactive playground */
+  .playground{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin:2rem 0}
+  .pg-toolbar{padding:.75rem 1.5rem;border-bottom:1px solid var(--bd);display:flex;gap:6px;flex-wrap:wrap}
+  .pg-btn{padding:6px 16px;border-radius:7px;font-size:.78rem;font-weight:600;border:1px solid var(--bd);background:var(--s2);color:var(--dim);cursor:pointer;transition:.2s;font-family:'Inter',sans-serif}
+  .pg-btn:hover{color:var(--tx);background:var(--s3)}
+  .pg-btn.active{background:var(--v);border-color:var(--v);color:#fff}
+  .pg-canvas{height:400px;display:flex;align-items:center;justify-content:center;position:relative;background:var(--bg)}
+  .pg-canvas svg{width:360px;height:360px}
+  .pg-info{padding:1rem 1.5rem;border-top:1px solid var(--bd);font-size:.82rem;color:var(--dim);font-family:'JetBrains Mono',monospace;display:flex;justify-content:space-between}
+
+  /* Formula display */
+  .formula-bar{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r2);padding:1rem 1.5rem;margin:1rem 0;font-family:'JetBrains Mono',monospace;font-size:.85rem;display:flex;align-items:center;gap:.75rem;overflow-x:auto}
+  .formula-bar .f-label{color:var(--dim2);font-size:.68rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
+
+  footer{border-top:1px solid var(--bd);padding:2.5rem 2rem;text-align:center;color:var(--dim2);font-size:.8rem}
+
+  @media(max-width:768px){
+    .build-body{grid-template-columns:1fr}
+    .winding-demo{grid-template-columns:1fr}
+    nav .pills{display:none}
+    .wrap{padding:0 1.25rem}
+    .pg-canvas{height:300px}
+  }
+
+  .fade{opacity:0;transform:translateY(16px);transition:.5s ease}
+  .fade.vis{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<nav><div class="inner">
+  <div class="logo"><div class="dot"></div>Advanced Shape Math</div>
+  <div class="pills">
+    <a href="#chained">Chained Ops</a>
+    <a href="#builds">Icon Builds</a>
+    <a href="#winding">Winding Rules</a>
+    <a href="#advanced">Advanced Pathfinder</a>
+    <a href="#playground">Playground</a>
+  </div>
+</div></nav>
+
+<!-- ═══════ HERO ═══════ -->
+<section id="hero">
+  <div class="wrap" style="display:flex;flex-direction:column;align-items:center">
+    <div class="hero-chip">Beyond Union & Subtract</div>
+    <h1>Complex Shape Math<br>for Real Design Work</h1>
+    <p class="sub" style="text-align:center">Chained boolean operations, multi-step icon construction, winding rules, Divide/Trim/Crop, and compound path tricks.</p>
+  </div>
+</section>
+
+<!-- ═══════ SECTION 1: CHAINED BOOLEANS ═══════ -->
+<section id="chained" class="fade">
+<div class="wrap">
+  <div class="label">01 — Chained Boolean Operations</div>
+  <h2>Stacking Operations</h2>
+  <p class="sub">Real icons aren't built with a single boolean. They chain 3–5 operations in sequence. The order matters — changing the sequence gives a completely different result.</p>
+
+  <!-- BUILD: Settings Gear -->
+  <div class="build">
+    <div class="build-header">
+      <div class="build-num">01</div>
+      <h3>Build a Settings Gear Icon</h3>
+      <span class="difficulty diff-med">Medium</span>
+    </div>
+    <div class="build-body">
+      <div class="build-visual" id="gear-vis">
+        <svg viewBox="0 0 360 360" id="gear-svg">
+          <!-- Step 1: Base shapes -->
+          <g id="gear-s1">
+            <circle cx="180" cy="180" r="70" fill="none" stroke="var(--v2)" stroke-width="2" stroke-dasharray="4 3" opacity=".4"/>
+            <circle cx="180" cy="180" r="42" fill="none" stroke="var(--cy2)" stroke-width="2" stroke-dasharray="4 3" opacity=".4"/>
+            <rect x="168" y="96" width="24" height="168" rx="6" fill="var(--v)" opacity=".25" stroke="var(--v2)" stroke-width="1.5"/>
+            <rect x="96" y="168" width="168" height="24" rx="6" fill="var(--v)" opacity=".25" stroke="var(--v2)" stroke-width="1.5"/>
+            <text x="180" y="340" text-anchor="middle" fill="var(--dim)" font-size="11" font-family="Inter">Step 1 — Draw outer circle + inner circle + 2 rectangles</text>
+          </g>
+          <!-- Step 2: Rotated teeth -->
+          <g id="gear-s2" style="display:none">
+            <circle cx="180" cy="180" r="70" fill="none" stroke="var(--v2)" stroke-width="2" stroke-dasharray="4 3" opacity=".4"/>
+            <rect x="168" y="96" width="24" height="168" rx="6" fill="var(--v)" opacity=".3"/>
+            <rect x="96" y="168" width="168" height="24" rx="6" fill="var(--v)" opacity=".3"/>
+            <rect x="168" y="96" width="24" height="168" rx="6" fill="var(--or)" opacity=".3" transform="rotate(45 180 180)"/>
+            <rect x="96" y="168" width="168" height="24" rx="6" fill="var(--or)" opacity=".3" transform="rotate(45 180 180)"/>
+            <rect x="168" y="96" width="24" height="168" rx="6" fill="var(--gn)" opacity=".3" transform="rotate(22.5 180 180)"/>
+            <rect x="96" y="168" width="168" height="24" rx="6" fill="var(--gn)" opacity=".3" transform="rotate(22.5 180 180)"/>
+            <rect x="168" y="96" width="24" height="168" rx="6" fill="var(--pk)" opacity=".25" transform="rotate(67.5 180 180)"/>
+            <rect x="96" y="168" width="168" height="24" rx="6" fill="var(--pk)" opacity=".25" transform="rotate(67.5 180 180)"/>
+            <text x="180" y="340" text-anchor="middle" fill="var(--dim)" font-size="11" font-family="Inter">Step 2 — Duplicate + rotate at 22.5°, 45°, 67.5°</text>
+          </g>
+          <!-- Step 3: Union all teeth -->
+          <g id="gear-s3" style="display:none">
+            <g opacity=".9">
+              <rect x="168" y="96" width="24" height="168" rx="6" fill="var(--v)"/>
+              <rect x="96" y="168" width="168" height="24" rx="6" fill="var(--v)"/>
+              <rect x="168" y="96" width="24" height="168" rx="6" fill="var(--v)" transform="rotate(45 180 180)"/>
+              <rect x="96" y="168" width="168" height="24" rx="6" fill="var(--v)" transform="rotate(45 180 180)"/>
+              <rect x="168" y="96" width="24" height="168" rx="6" fill="var(--v)" transform="rotate(22.5 180 180)"/>
+              <rect x="96" y="168" width="168" height="24" rx="6" fill="var(--v)" transform="rotate(22.5 180 180)"/>
+              <rect x="168" y="96" width="24" height="168" rx="6" fill="var(--v)" transform="rotate(67.5 180 180)"/>
+              <rect x="96" y="168" width="168" height="24" rx="6" fill="var(--v)" transform="rotate(67.5 180 180)"/>
+              <circle cx="180" cy="180" r="70" fill="var(--v)"/>
+            </g>
+            <text x="180" y="340" text-anchor="middle" fill="var(--dim)" font-size="11" font-family="Inter">Step 3 — UNION all rectangles + outer circle → one shape</text>
+          </g>
+          <!-- Step 4: Intersect with larger circle to clip teeth -->
+          <g id="gear-s4" style="display:none">
+            <defs>
+              <clipPath id="gearClip"><circle cx="180" cy="180" r="85"/></clipPath>
+              <mask id="gearHole"><rect width="360" height="360" fill="white"/><circle cx="180" cy="180" r="42" fill="black"/></mask>
+            </defs>
+            <g clip-path="url(#gearClip)" mask="url(#gearHole)">
+              <rect x="168" y="96" width="24" height="168" rx="6" fill="var(--v)"/>
+              <rect x="96" y="168" width="168" height="24" rx="6" fill="var(--v)"/>
+              <rect x="168" y="96" width="24" height="168" rx="6" fill="var(--v)" transform="rotate(45 180 180)"/>
+              <rect x="96" y="168" width="168" height="24" rx="6" fill="var(--v)" transform="rotate(45 180 180)"/>
+              <rect x="168" y="96" width="24" height="168" rx="6" fill="var(--v)" transform="rotate(22.5 180 180)"/>
+              <rect x="96" y="168" width="168" height="24" rx="6" fill="var(--v)" transform="rotate(22.5 180 180)"/>
+              <rect x="168" y="96" width="24" height="168" rx="6" fill="var(--v)" transform="rotate(67.5 180 180)"/>
+              <rect x="96" y="168" width="168" height="24" rx="6" fill="var(--v)" transform="rotate(67.5 180 180)"/>
+              <circle cx="180" cy="180" r="70" fill="var(--v)"/>
+            </g>
+            <circle cx="180" cy="180" r="85" fill="none" stroke="var(--or)" stroke-width="1.5" stroke-dasharray="4 3" opacity=".5"/>
+            <circle cx="180" cy="180" r="42" fill="none" stroke="var(--cy)" stroke-width="1.5" stroke-dasharray="4 3" opacity=".5"/>
+            <text x="180" y="340" text-anchor="middle" fill="var(--dim)" font-size="11" font-family="Inter">Step 4 — INTERSECT with bounding circle → SUBTRACT inner circle</text>
+          </g>
+          <!-- Step 5: Final -->
+          <g id="gear-s5" style="display:none">
+            <defs>
+              <clipPath id="gearClip2"><circle cx="180" cy="180" r="85"/></clipPath>
+              <mask id="gearHole2"><rect width="360" height="360" fill="white"/><circle cx="180" cy="180" r="42" fill="black"/></mask>
+              <linearGradient id="gearG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient>
+            </defs>
+            <g clip-path="url(#gearClip2)" mask="url(#gearHole2)">
+              <rect x="168" y="96" width="24" height="168" rx="6" fill="url(#gearG)"/>
+              <rect x="96" y="168" width="168" height="24" rx="6" fill="url(#gearG)"/>
+              <rect x="168" y="96" width="24" height="168" rx="6" fill="url(#gearG)" transform="rotate(45 180 180)"/>
+              <rect x="96" y="168" width="168" height="24" rx="6" fill="url(#gearG)" transform="rotate(45 180 180)"/>
+              <rect x="168" y="96" width="24" height="168" rx="6" fill="url(#gearG)" transform="rotate(22.5 180 180)"/>
+              <rect x="96" y="168" width="168" height="24" rx="6" fill="url(#gearG)" transform="rotate(22.5 180 180)"/>
+              <rect x="168" y="96" width="24" height="168" rx="6" fill="url(#gearG)" transform="rotate(67.5 180 180)"/>
+              <rect x="96" y="168" width="168" height="24" rx="6" fill="url(#gearG)" transform="rotate(67.5 180 180)"/>
+              <circle cx="180" cy="180" r="70" fill="url(#gearG)"/>
+            </g>
+            <text x="180" y="340" text-anchor="middle" fill="var(--dim)" font-size="11" font-family="Inter">Final — Clean gear icon from only circles + rectangles</text>
+          </g>
+        </svg>
+      </div>
+      <div class="build-explain">
+        <div class="formula-bar">
+          <span class="f-label">Chain</span>
+          <span class="op op-union">UNION</span><span class="op-arrow">→</span>
+          <span class="op op-union">UNION</span><span class="op-arrow">→</span>
+          <span class="op op-int">INTERSECT</span><span class="op-arrow">→</span>
+          <span class="op op-sub">SUBTRACT</span>
+        </div>
+        <p><strong>Primitives used:</strong> 1 outer circle, 1 inner circle, 4 pairs of crossed rectangles at 22.5° intervals.</p>
+        <p>Step through each phase to see how a complex icon is built entirely from basic shapes and 4 chained boolean operations.</p>
+        <p><strong>Key insight:</strong> The order is critical. Union the teeth first, then intersect to clip, then subtract the hole. If you subtract first, you lose your cutting shape.</p>
+        <div class="step-row">
+          <button class="step-btn active" onclick="showGearStep(1)">1. Shapes</button>
+          <button class="step-btn" onclick="showGearStep(2)">2. Rotate</button>
+          <button class="step-btn" onclick="showGearStep(3)">3. Union</button>
+          <button class="step-btn" onclick="showGearStep(4)">4. Clip+Cut</button>
+          <button class="step-btn" onclick="showGearStep(5)">5. Final</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUILD: Eye Icon -->
+  <div class="build">
+    <div class="build-header">
+      <div class="build-num">02</div>
+      <h3>Build an Eye / Visibility Icon</h3>
+      <span class="difficulty diff-med">Medium</span>
+    </div>
+    <div class="build-body">
+      <div class="build-visual">
+        <svg viewBox="0 0 360 300" id="eye-svg">
+          <g id="eye-s1">
+            <circle cx="130" cy="150" r="80" fill="none" stroke="var(--cy)" stroke-width="2" opacity=".5"/>
+            <circle cx="230" cy="150" r="80" fill="none" stroke="var(--pk)" stroke-width="2" opacity=".5"/>
+            <text x="130" y="155" text-anchor="middle" fill="var(--cy)" font-size="10" font-family="Inter">A</text>
+            <text x="230" y="155" text-anchor="middle" fill="var(--pk)" font-size="10" font-family="Inter">B</text>
+            <text x="180" y="275" text-anchor="middle" fill="var(--dim)" font-size="11" font-family="Inter">Step 1 — Two overlapping circles, offset horizontally</text>
+          </g>
+          <g id="eye-s2" style="display:none">
+            <defs>
+              <clipPath id="eyeClip1"><circle cx="130" cy="150" r="80"/></clipPath>
+            </defs>
+            <circle cx="130" cy="150" r="80" fill="none" stroke="var(--cy)" stroke-width="1.5" stroke-dasharray="4 3" opacity=".3"/>
+            <circle cx="230" cy="150" r="80" fill="none" stroke="var(--pk)" stroke-width="1.5" stroke-dasharray="4 3" opacity=".3"/>
+            <g clip-path="url(#eyeClip1)"><circle cx="230" cy="150" r="80" fill="var(--v)" opacity=".8"/></g>
+            <text x="180" y="275" text-anchor="middle" fill="var(--dim)" font-size="11" font-family="Inter">Step 2 — INTERSECT → almond/vesica piscis shape</text>
+          </g>
+          <g id="eye-s3" style="display:none">
+            <defs>
+              <clipPath id="eyeClip2"><circle cx="130" cy="150" r="80"/></clipPath>
+              <mask id="eyeMask"><rect width="360" height="300" fill="white"/><circle cx="180" cy="150" r="32" fill="black"/></mask>
+            </defs>
+            <g clip-path="url(#eyeClip2)" mask="url(#eyeMask)"><circle cx="230" cy="150" r="80" fill="var(--v)" opacity=".8"/></g>
+            <circle cx="180" cy="150" r="32" fill="none" stroke="var(--or)" stroke-width="1.5" stroke-dasharray="4 3" opacity=".5"/>
+            <circle cx="180" cy="150" r="14" fill="var(--tx)" opacity=".9"/>
+            <text x="180" y="275" text-anchor="middle" fill="var(--dim)" font-size="11" font-family="Inter">Step 3 — SUBTRACT pupil circle → add iris dot</text>
+          </g>
+          <g id="eye-s4" style="display:none">
+            <defs>
+              <linearGradient id="eyeG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#06b6d4"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient>
+              <clipPath id="eyeClip3"><circle cx="130" cy="150" r="80"/></clipPath>
+              <mask id="eyeMask2"><rect width="360" height="300" fill="white"/><circle cx="180" cy="150" r="32" fill="black"/></mask>
+            </defs>
+            <g clip-path="url(#eyeClip3)" mask="url(#eyeMask2)"><circle cx="230" cy="150" r="80" fill="url(#eyeG)"/></g>
+            <circle cx="180" cy="150" r="14" fill="var(--tx)"/>
+            <circle cx="174" cy="143" r="5" fill="white" opacity=".6"/>
+            <text x="180" y="275" text-anchor="middle" fill="var(--dim)" font-size="11" font-family="Inter">Final — Add highlight dot for realism. Only circles used!</text>
+          </g>
+        </svg>
+      </div>
+      <div class="build-explain">
+        <div class="formula-bar">
+          <span class="f-label">Chain</span>
+          <span class="op op-int">INTERSECT</span><span class="op-arrow">→</span>
+          <span class="op op-sub">SUBTRACT</span><span class="op-arrow">→</span>
+          <span class="op op-union">UNION</span>
+        </div>
+        <p><strong>Primitives used:</strong> Only circles. Two large overlapping circles create the almond eye shape (called a <strong>vesica piscis</strong> in geometry).</p>
+        <p>The intersect of two offset circles is one of the most useful compound shapes in design. It creates organic, eye-like, leaf-like, and petal-like forms from pure geometry.</p>
+        <p><strong>Mind-blower:</strong> The Mastercard logo, the NFL logo, and countless leaf/petal icons all start from this same intersect trick.</p>
+        <div class="step-row">
+          <button class="step-btn active" onclick="showEyeStep(1)">1. Circles</button>
+          <button class="step-btn" onclick="showEyeStep(2)">2. Intersect</button>
+          <button class="step-btn" onclick="showEyeStep(3)">3. Subtract</button>
+          <button class="step-btn" onclick="showEyeStep(4)">4. Final</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUILD: Shield / Badge -->
+  <div class="build">
+    <div class="build-header">
+      <div class="build-num">03</div>
+      <h3>Build a Shield Badge with Checkmark</h3>
+      <span class="difficulty diff-hard">Hard</span>
+    </div>
+    <div class="build-body">
+      <div class="build-visual">
+        <svg viewBox="0 0 360 360" id="shield-svg">
+          <g id="sh-s1">
+            <rect x="110" y="80" width="140" height="160" rx="6" fill="none" stroke="var(--v2)" stroke-width="2" opacity=".5"/>
+            <circle cx="180" cy="240" r="70" fill="none" stroke="var(--cy2)" stroke-width="2" opacity=".5"/>
+            <text x="180" y="340" text-anchor="middle" fill="var(--dim)" font-size="11" font-family="Inter">Step 1 — Rounded rectangle + large circle below</text>
+          </g>
+          <g id="sh-s2" style="display:none">
+            <rect x="110" y="80" width="140" height="160" rx="6" fill="var(--v)" opacity=".4"/>
+            <circle cx="180" cy="240" r="70" fill="var(--v)" opacity=".4"/>
+            <text x="180" y="340" text-anchor="middle" fill="var(--dim)" font-size="11" font-family="Inter">Step 2 — UNION → creates shield silhouette</text>
+          </g>
+          <g id="sh-s3" style="display:none">
+            <defs>
+              <clipPath id="shCrop">
+                <rect x="110" y="80" width="140" height="200"/>
+              </clipPath>
+            </defs>
+            <g clip-path="url(#shCrop)">
+              <rect x="110" y="80" width="140" height="160" rx="6" fill="var(--v)" opacity=".6"/>
+              <circle cx="180" cy="240" r="70" fill="var(--v)" opacity=".6"/>
+            </g>
+            <rect x="110" y="80" width="140" height="200" fill="none" stroke="var(--or)" stroke-width="1.5" stroke-dasharray="4 3" opacity=".4"/>
+            <text x="180" y="340" text-anchor="middle" fill="var(--dim)" font-size="11" font-family="Inter">Step 3 — INTERSECT with bounding rect to crop bottom curve</text>
+          </g>
+          <g id="sh-s4" style="display:none">
+            <defs>
+              <clipPath id="shCrop2"><rect x="110" y="80" width="140" height="200"/></clipPath>
+              <mask id="shInner">
+                <rect width="360" height="360" fill="white"/>
+                <rect x="120" y="90" width="120" height="145" rx="4" fill="black"/>
+                <circle cx="180" cy="235" r="60" fill="black"/>
+              </mask>
+              <linearGradient id="shG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient>
+            </defs>
+            <g clip-path="url(#shCrop2)" mask="url(#shInner)">
+              <rect x="110" y="80" width="140" height="160" rx="6" fill="url(#shG)"/>
+              <circle cx="180" cy="240" r="70" fill="url(#shG)"/>
+            </g>
+            <g clip-path="url(#shCrop2)">
+              <rect x="120" y="90" width="120" height="145" rx="4" fill="var(--s1)" opacity=".85"/>
+              <circle cx="180" cy="235" r="60" fill="var(--s1)" opacity=".85"/>
+            </g>
+            <!-- checkmark -->
+            <polyline points="155,185 173,203 207,165" fill="none" stroke="var(--gn2)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="180" y="340" text-anchor="middle" fill="var(--dim)" font-size="11" font-family="Inter">Final — Offset smaller shield inside → SUBTRACT → add checkmark stroke</text>
+          </g>
+        </svg>
+      </div>
+      <div class="build-explain">
+        <div class="formula-bar">
+          <span class="f-label">Chain</span>
+          <span class="op op-union">UNION</span><span class="op-arrow">→</span>
+          <span class="op op-int">INTERSECT</span><span class="op-arrow">→</span>
+          <span class="op op-sub">SUBTRACT</span><span class="op-arrow">→</span>
+          <span class="op op-sub">SUBTRACT</span><span class="op-arrow">→</span>
+          <span class="op op-union">UNION</span>
+        </div>
+        <p><strong>5-step chain.</strong> The shield shape itself is a union of a rectangle + circle, intersected with a bounding box to crop the bottom. The border effect is created by subtracting a smaller copy from the larger shape (Offset Path trick).</p>
+        <p><strong>Key technique: Offset Path subtraction.</strong> Duplicate a shape, scale it down uniformly, subtract it from the original. This creates perfect uniform borders and outlines that stroke-width can't achieve on complex shapes.</p>
+        <div class="step-row">
+          <button class="step-btn active" onclick="showShieldStep(1)">1. Shapes</button>
+          <button class="step-btn" onclick="showShieldStep(2)">2. Union</button>
+          <button class="step-btn" onclick="showShieldStep(3)">3. Crop</button>
+          <button class="step-btn" onclick="showShieldStep(4)">4. Final</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════ SECTION 2: WINDING RULES ═══════ -->
+<section id="winding" class="fade">
+<div class="wrap">
+  <div class="label">02 — Winding Rules (Compound Paths)</div>
+  <h2>The Fill Rule Nobody Explains</h2>
+  <p class="sub">When you put a shape inside another shape using a compound path, the inner shape can either be filled or become a hole. Winding rules control which happens — and understanding them is key to building clean logos.</p>
+
+  <div class="winding-demo">
+    <div class="winding-card">
+      <svg viewBox="0 0 200 200" width="180" height="180">
+        <defs><linearGradient id="eoG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient></defs>
+        <!-- outer rect CW, inner rect CW — with even-odd, inner becomes hole -->
+        <path d="M30,30 L170,30 L170,170 L30,170 Z M70,70 L130,70 L130,130 L70,130 Z" fill="url(#eoG)" fill-rule="evenodd"/>
+        <text x="100" y="107" text-anchor="middle" fill="var(--bg)" font-size="13" font-weight="700" font-family="Inter">HOLE</text>
+      </svg>
+      <h4>Even-Odd Rule</h4>
+      <p>Counts how many path boundaries a ray crosses. Odd = filled, Even = empty. <strong>Inner shapes always become holes</strong> regardless of path direction.</p>
+      <div style="margin-top:.75rem"><code>fill-rule: evenodd</code></div>
+      <div class="tip" style="text-align:left;margin-top:1rem">
+        <span class="tip-badge">USE</span>
+        <p>This is what Figma uses by default. It's predictable — any enclosed shape becomes a cutout. Great for letters like O, A, D, B.</p>
+      </div>
+    </div>
+    <div class="winding-card">
+      <svg viewBox="0 0 200 200" width="180" height="180">
+        <defs><linearGradient id="nzG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#06b6d4"/><stop offset="100%" stop-color="#67e8f9"/></linearGradient></defs>
+        <!-- outer CW, inner CW — non-zero fills both -->
+        <path d="M30,30 L170,30 L170,170 L30,170 Z M70,70 L130,70 L130,130 L70,130 Z" fill="url(#nzG)" fill-rule="nonzero"/>
+        <text x="100" y="107" text-anchor="middle" fill="var(--bg)" font-size="13" font-weight="700" font-family="Inter">FILLED</text>
+      </svg>
+      <h4>Non-Zero Rule</h4>
+      <p>Considers path <strong>direction</strong> (clockwise vs counter-clockwise). Same direction = filled. Opposite direction = hole. You control the result by reversing paths.</p>
+      <div style="margin-top:.75rem"><code>fill-rule: nonzero</code></div>
+      <div class="tip" style="text-align:left;margin-top:1rem">
+        <span class="tip-badge">USE</span>
+        <p>Illustrator's default. Reverse a path's direction (Path → Reverse) to toggle between hole and fill. Essential for compound path logos.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip">
+    <span class="tip-badge">WHY THIS MATTERS</span>
+    <p><strong>Real scenario:</strong> You paste an SVG logo into Figma and the counter-spaces fill in solid instead of being holes. That's a winding rule mismatch. Fix it by selecting the inner path and choosing "Reverse Path Direction" or switching the fill rule.</p>
+  </div>
+</div>
+</section>
+
+<!-- ═══════ SECTION 3: ADVANCED PATHFINDER ═══════ -->
+<section id="advanced" class="fade">
+<div class="wrap">
+  <div class="label">03 — Advanced Pathfinder Operations</div>
+  <h2>Beyond the Big Four</h2>
+  <p class="sub">Illustrator's Pathfinder panel has 6 additional operations that most designers never touch. Here's what they do and when they're indispensable.</p>
+
+  <div class="concepts">
+    <div class="concept">
+      <div class="concept-vis">
+        <svg viewBox="0 0 240 120" width="200">
+          <!-- Divide: all regions become separate -->
+          <circle cx="90" cy="60" r="40" fill="var(--v)" opacity=".3" stroke="var(--tx)" stroke-width="1.5"/>
+          <circle cx="140" cy="60" r="40" fill="var(--pk)" opacity=".3" stroke="var(--tx)" stroke-width="1.5"/>
+          <line x1="115" y1="25" x2="115" y2="95" stroke="var(--or)" stroke-width="1.5" stroke-dasharray="3 2"/>
+          <text x="75" y="64" text-anchor="middle" fill="var(--tx)" font-size="9" font-weight="600" font-family="Inter">A</text>
+          <text x="115" y="64" text-anchor="middle" fill="var(--tx)" font-size="9" font-weight="600" font-family="Inter">AB</text>
+          <text x="155" y="64" text-anchor="middle" fill="var(--tx)" font-size="9" font-weight="600" font-family="Inter">B</text>
+        </svg>
+      </div>
+      <h4>Divide</h4>
+      <p>Cuts all overlapping shapes into <strong>separate individual pieces</strong> along every intersection. Like using a knife at every overlap. Each fragment becomes its own shape you can color, move, or delete independently.</p>
+      <div class="op-chain"><span class="op op-div">DIVIDE</span></div>
+      <p style="margin-top:.5rem"><strong>Use case:</strong> Sticker-style illustrations, color separation, creating puzzle-piece effects. Draw your shapes loosely, divide, then color each region.</p>
+    </div>
+
+    <div class="concept">
+      <div class="concept-vis">
+        <svg viewBox="0 0 240 120" width="200">
+          <circle cx="90" cy="60" r="40" fill="var(--v)" opacity=".7"/>
+          <circle cx="140" cy="60" r="40" fill="var(--s1)" stroke="var(--pk)" stroke-width="1.5"/>
+          <text x="155" y="64" text-anchor="middle" fill="var(--pk)" font-size="9" font-weight="600" font-family="Inter">visible</text>
+        </svg>
+      </div>
+      <h4>Trim</h4>
+      <p>Removes the <strong>hidden portions</strong> of overlapping shapes. What you see is what you get — hidden areas behind other shapes are deleted. Shapes keep their original colors but lose their hidden parts.</p>
+      <div class="op-chain"><span class="op" style="background:rgba(236,72,153,.12);color:var(--pk2)">TRIM</span></div>
+      <p style="margin-top:.5rem"><strong>Use case:</strong> Preparing artwork for print where overlapping fills cause ink problems. Also great for simplifying complex layered illustrations.</p>
+    </div>
+
+    <div class="concept">
+      <div class="concept-vis">
+        <svg viewBox="0 0 240 120" width="200">
+          <defs>
+            <clipPath id="cropC"><rect x="75" y="20" width="80" height="80"/></clipPath>
+          </defs>
+          <rect x="75" y="20" width="80" height="80" fill="none" stroke="var(--or)" stroke-width="1.5" stroke-dasharray="3 2" opacity=".5"/>
+          <circle cx="115" cy="60" r="45" fill="var(--cy)" opacity=".7" clip-path="url(#cropC)"/>
+        </svg>
+      </div>
+      <h4>Crop</h4>
+      <p>The <strong>top shape acts as a cookie cutter window</strong>. Everything outside the top shape is removed. Similar to a clipping mask but destructive — the result is actual paths, not a masked group.</p>
+      <div class="op-chain"><span class="op" style="background:rgba(245,158,11,.12);color:var(--or2)">CROP</span></div>
+      <p style="margin-top:.5rem"><strong>Use case:</strong> Cutting artwork to fit specific dimensions, creating viewport effects, trimming illustrations to exact bleed boundaries.</p>
+    </div>
+
+    <div class="concept">
+      <div class="concept-vis">
+        <svg viewBox="0 0 240 120" width="200">
+          <circle cx="90" cy="60" r="40" fill="none" stroke="var(--v2)" stroke-width="2"/>
+          <circle cx="140" cy="60" r="40" fill="none" stroke="var(--pk2)" stroke-width="2"/>
+          <line x1="106" y1="26" x2="106" y2="94" stroke="var(--gn2)" stroke-width="2"/>
+          <line x1="124" y1="26" x2="124" y2="94" stroke="var(--gn2)" stroke-width="2"/>
+        </svg>
+      </div>
+      <h4>Outline</h4>
+      <p>Divides shapes at intersections AND <strong>splits strokes into filled segments</strong>. Every line segment between two intersection points becomes a separate object. Removes all fills, keeps only the skeleton.</p>
+      <div class="op-chain"><span class="op" style="background:rgba(16,185,129,.12);color:var(--gn2)">OUTLINE</span></div>
+      <p style="margin-top:.5rem"><strong>Use case:</strong> Creating stained-glass effects, wireframe art, and preparing artwork for laser cutting where you need individual path segments.</p>
+    </div>
+
+    <div class="concept">
+      <div class="concept-vis">
+        <svg viewBox="0 0 240 120" width="200">
+          <circle cx="90" cy="60" r="40" fill="var(--v)" opacity=".7"/>
+          <defs><mask id="mbm"><rect width="240" height="120" fill="white"/><circle cx="90" cy="60" r="40" fill="black"/></mask></defs>
+          <circle cx="140" cy="60" r="40" fill="var(--pk)" opacity=".7" mask="url(#mbm)"/>
+          <text x="155" y="64" text-anchor="middle" fill="var(--tx)" font-size="9" font-weight="600" font-family="Inter">B only</text>
+        </svg>
+      </div>
+      <h4>Minus Back</h4>
+      <p>The reverse of Subtract (Minus Front). The <strong>back shape cuts from the front shape</strong>. Stack order matters — this removes the bottom shape's area from the top shape.</p>
+      <div class="op-chain"><span class="op op-sub">MINUS BACK</span></div>
+      <p style="margin-top:.5rem"><strong>Use case:</strong> When your cutting shape is behind the target. Saves you from re-ordering layers. Also useful when batch-processing multiple subtractions.</p>
+    </div>
+
+    <div class="concept">
+      <div class="concept-vis">
+        <svg viewBox="0 0 240 120" width="200">
+          <circle cx="90" cy="60" r="40" fill="var(--v)" opacity=".5"/>
+          <circle cx="140" cy="60" r="40" fill="var(--v)" opacity=".5"/>
+          <path d="M115 25 A40 40 0 0 0 115 95 A40 40 0 0 0 115 25Z" fill="var(--v)" opacity=".9"/>
+          <text x="115" y="64" text-anchor="middle" fill="white" font-size="9" font-weight="600" font-family="Inter">merged</text>
+        </svg>
+      </div>
+      <h4>Merge</h4>
+      <p>Like Unite/Union but <strong>only merges same-colored shapes</strong>. Different colors stay separate. It also removes hidden areas like Trim. Best of both worlds.</p>
+      <div class="op-chain"><span class="op op-union">MERGE</span></div>
+      <p style="margin-top:.5rem"><strong>Use case:</strong> Cleaning up complex multi-colored illustrations. Apply Merge to simplify the shape structure while preserving your color separations.</p>
+    </div>
+  </div>
+
+  <div class="tip" style="margin-top:2rem">
+    <span class="tip-badge">FIGMA GAP</span>
+    <p><strong>Figma doesn't have Divide, Trim, Crop, Outline, Minus Back, or Merge.</strong> This is why Illustrator is still superior for production illustration work. In Figma, you'd need to manually simulate these with combinations of the basic four operations + Flatten. Figma's new Shape Builder tool closes the gap somewhat, but for precise control, Illustrator's Pathfinder is unmatched.</p>
+  </div>
+</div>
+</section>
+
+<!-- ═══════ SECTION 4: PLAYGROUND ═══════ -->
+<section id="playground" class="fade">
+<div class="wrap">
+  <div class="label">04 — Interactive Playground</div>
+  <h2>See It Live</h2>
+  <p class="sub">Click the operations below to see each boolean applied to the same pair of overlapping shapes in real time.</p>
+
+  <div class="playground">
+    <div class="pg-toolbar">
+      <button class="pg-btn active" data-op="none" onclick="setPlayground('none',this)">No Operation</button>
+      <button class="pg-btn" data-op="union" onclick="setPlayground('union',this)">Union</button>
+      <button class="pg-btn" data-op="subtract" onclick="setPlayground('subtract',this)">Subtract</button>
+      <button class="pg-btn" data-op="intersect" onclick="setPlayground('intersect',this)">Intersect</button>
+      <button class="pg-btn" data-op="exclude" onclick="setPlayground('exclude',this)">Exclude</button>
+      <button class="pg-btn" data-op="divide" onclick="setPlayground('divide',this)">Divide</button>
+    </div>
+    <div class="pg-canvas" id="pgCanvas">
+      <!-- Dynamically rendered by JS -->
+    </div>
+    <div class="pg-info">
+      <span id="pgLabel">Select an operation above</span>
+      <span id="pgFormula">A ○ B</span>
+    </div>
+  </div>
+
+  <!-- Compound Path tricks -->
+  <h3 style="font-size:1.4rem;font-weight:800;letter-spacing:-.5px;margin:2rem 0 .5rem">Compound Path Tricks</h3>
+  <p class="sub">These techniques combine everything above into professional workflows.</p>
+
+  <div class="concepts" style="grid-template-columns:1fr 1fr">
+    <div class="concept">
+      <h4>Boolean → Outline Stroke → Boolean</h4>
+      <p>Create a shape with booleans. Convert its stroke to a fill (Outline Stroke). Now boolean that fill with another shape. This is how you create custom letter-cut logos where type is integrated into geometric shapes.</p>
+      <div class="op-chain" style="margin-top:.75rem">
+        <span class="op op-union">UNION</span><span class="op-arrow">→</span>
+        <span class="op" style="background:var(--s3);color:var(--dim)">OUTLINE STROKE</span><span class="op-arrow">→</span>
+        <span class="op op-sub">SUBTRACT</span>
+      </div>
+    </div>
+    <div class="concept">
+      <h4>Expand Appearance → Divide → Recolor</h4>
+      <p>Apply effects (like rounded corners, transforms, warps) then Expand Appearance to bake them in. Divide to separate regions. Now you can individually recolor each section — this is how flat illustration styles are built.</p>
+      <div class="op-chain" style="margin-top:.75rem">
+        <span class="op" style="background:var(--s3);color:var(--dim)">EXPAND</span><span class="op-arrow">→</span>
+        <span class="op op-div">DIVIDE</span><span class="op-arrow">→</span>
+        <span class="op" style="background:rgba(236,72,153,.12);color:var(--pk2)">RECOLOR</span>
+      </div>
+    </div>
+    <div class="concept">
+      <h4>Offset Path Stack</h4>
+      <p>Duplicate a shape 3–4 times at increasing Offset Path values. Each layer is slightly larger. Use Subtract between each pair to create concentric outline rings. Stack with different colors for the retro badge/stamp aesthetic.</p>
+      <div class="op-chain" style="margin-top:.75rem">
+        <span class="op" style="background:var(--s3);color:var(--dim)">OFFSET ×3</span><span class="op-arrow">→</span>
+        <span class="op op-sub">SUBTRACT</span><span class="op-arrow">→</span>
+        <span class="op op-sub">SUBTRACT</span><span class="op-arrow">→</span>
+        <span class="op" style="background:var(--s3);color:var(--dim)">COLOR</span>
+      </div>
+    </div>
+    <div class="concept">
+      <h4>Live Corners + Boolean = Squircle</h4>
+      <p>Illustrator's Live Corners (direct select → drag corner widgets) + boolean operations let you create iOS-style squircles and superellipses. Intersect a rounded square with a circle to fine-tune the corner smoothness beyond what border-radius gives you.</p>
+      <div class="op-chain" style="margin-top:.75rem">
+        <span class="op" style="background:var(--s3);color:var(--dim)">LIVE CORNERS</span><span class="op-arrow">→</span>
+        <span class="op op-int">INTERSECT</span><span class="op-arrow">→</span>
+        <span class="op" style="background:var(--s3);color:var(--dim)">SMOOTH</span>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<footer><div class="wrap">Built for Sherifdeen — Advanced Shape Math</div></footer>
+
+<script>
+// ═══ STEP BUILDERS ═══
+function showGearStep(n){
+  for(let i=1;i<=5;i++) document.getElementById('gear-s'+i).style.display=i===n?'':'none';
+  document.querySelectorAll('#gear-vis ~ .build-explain .step-btn').forEach((b,i)=>{b.classList.toggle('active',i===n-1)});
+  // target the correct step buttons within the gear's parent build
+  const btns = document.querySelector('#gear-vis').closest('.build').querySelectorAll('.step-btn');
+  btns.forEach((b,i)=>b.classList.toggle('active',i===n-1));
+}
+function showEyeStep(n){
+  for(let i=1;i<=4;i++) document.getElementById('eye-s'+i).style.display=i===n?'':'none';
+  const btns = document.querySelector('#eye-svg').closest('.build').querySelectorAll('.step-btn');
+  btns.forEach((b,i)=>b.classList.toggle('active',i===n-1));
+}
+function showShieldStep(n){
+  for(let i=1;i<=4;i++) document.getElementById('sh-s'+i).style.display=i===n?'':'none';
+  const btns = document.querySelector('#shield-svg').closest('.build').querySelectorAll('.step-btn');
+  btns.forEach((b,i)=>b.classList.toggle('active',i===n-1));
+}
+
+// ═══ PLAYGROUND ═══
+const pgData={
+  none:{
+    svg:`<svg viewBox="0 0 360 360">
+      <rect x="80" y="100" width="130" height="130" rx="14" fill="#7c3aed" opacity=".6"/>
+      <circle cx="230" cy="195" r="75" fill="#06b6d4" opacity=".6"/>
+      <text x="135" y="170" text-anchor="middle" fill="white" font-size="14" font-weight="700" font-family="Inter">A</text>
+      <text x="255" y="200" text-anchor="middle" fill="white" font-size="14" font-weight="700" font-family="Inter">B</text>
+    </svg>`,
+    label:'Two shapes, no operation applied',formula:'A ○ B'
+  },
+  union:{
+    svg:`<svg viewBox="0 0 360 360">
+      <defs><linearGradient id="pgu" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs>
+      <rect x="80" y="100" width="130" height="130" rx="14" fill="url(#pgu)"/>
+      <circle cx="230" cy="195" r="75" fill="url(#pgu)"/>
+    </svg>`,
+    label:'Union — merged into one combined shape',formula:'A ∪ B'
+  },
+  subtract:{
+    svg:`<svg viewBox="0 0 360 360">
+      <defs><mask id="pgm"><rect width="360" height="360" fill="white"/><circle cx="230" cy="195" r="75" fill="black"/></mask></defs>
+      <rect x="80" y="100" width="130" height="130" rx="14" fill="#7c3aed" mask="url(#pgm)"/>
+    </svg>`,
+    label:'Subtract — B cuts out of A',formula:'A − B'
+  },
+  intersect:{
+    svg:`<svg viewBox="0 0 360 360">
+      <defs>
+        <clipPath id="pgci"><rect x="80" y="100" width="130" height="130" rx="14"/></clipPath>
+        <linearGradient id="pgi" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ec4899"/><stop offset="100%" stop-color="#f9a8d4"/></linearGradient>
+      </defs>
+      <rect x="80" y="100" width="130" height="130" rx="14" fill="none" stroke="#7c3aed30" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <circle cx="230" cy="195" r="75" fill="none" stroke="#06b6d430" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <circle cx="230" cy="195" r="75" fill="url(#pgi)" clip-path="url(#pgci)"/>
+    </svg>`,
+    label:'Intersect — only the overlapping area survives',formula:'A ∩ B'
+  },
+  exclude:{
+    svg:`<svg viewBox="0 0 360 360">
+      <defs>
+        <clipPath id="pgcx"><rect x="80" y="100" width="130" height="130" rx="14"/></clipPath>
+        <mask id="pgmx"><rect width="360" height="360" fill="white"/><circle cx="230" cy="195" r="75" fill="black" clip-path="url(#pgcx)"/></mask>
+        <linearGradient id="pgx" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#fcd34d"/></linearGradient>
+      </defs>
+      <rect x="80" y="100" width="130" height="130" rx="14" fill="url(#pgx)" mask="url(#pgmx)"/>
+      <defs><mask id="pgmx2"><rect width="360" height="360" fill="white"/><rect x="80" y="100" width="130" height="130" rx="14" fill="black"/></mask></defs>
+      <circle cx="230" cy="195" r="75" fill="url(#pgx)" mask="url(#pgmx2)"/>
+    </svg>`,
+    label:'Exclude — everything except the overlap (XOR)',formula:'A ⊕ B'
+  },
+  divide:{
+    svg:`<svg viewBox="0 0 360 360">
+      <defs>
+        <clipPath id="pgd1"><rect x="80" y="100" width="130" height="130" rx="14"/></clipPath>
+        <mask id="pgdm"><rect width="360" height="360" fill="white"/><circle cx="230" cy="195" r="75" fill="black"/></mask>
+        <mask id="pgdm2"><rect width="360" height="360" fill="white"/><rect x="80" y="100" width="130" height="130" rx="14" fill="black"/></mask>
+      </defs>
+      <!-- A only region -->
+      <rect x="80" y="100" width="130" height="130" rx="14" fill="#7c3aed" opacity=".7" mask="url(#pgdm)"/>
+      <!-- Overlap region -->
+      <circle cx="230" cy="195" r="75" fill="#ec4899" opacity=".7" clip-path="url(#pgd1)"/>
+      <!-- B only region -->
+      <circle cx="230" cy="195" r="75" fill="#06b6d4" opacity=".7" mask="url(#pgdm2)"/>
+      <!-- Division lines -->
+      <rect x="80" y="100" width="130" height="130" rx="14" fill="none" stroke="white" stroke-width="1.5"/>
+      <circle cx="230" cy="195" r="75" fill="none" stroke="white" stroke-width="1.5"/>
+      <text x="125" y="175" text-anchor="middle" fill="white" font-size="11" font-weight="600" font-family="Inter">A</text>
+      <text x="185" y="185" text-anchor="middle" fill="white" font-size="11" font-weight="600" font-family="Inter">A∩B</text>
+      <text x="265" y="210" text-anchor="middle" fill="white" font-size="11" font-weight="600" font-family="Inter">B</text>
+    </svg>`,
+    label:'Divide — all regions become separate, independently editable pieces',formula:'A | A∩B | B'
+  }
+};
+
+function setPlayground(op,btn){
+  document.querySelectorAll('.pg-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const d=pgData[op];
+  document.getElementById('pgCanvas').innerHTML=d.svg;
+  document.getElementById('pgLabel').textContent=d.label;
+  document.getElementById('pgFormula').textContent=d.formula;
+}
+// init
+document.getElementById('pgCanvas').innerHTML=pgData.none.svg;
+
+// Scroll observer
+const obs=new IntersectionObserver(e=>{e.forEach(el=>{if(el.isIntersecting)el.target.classList.add('vis')})},{threshold:.08});
+document.querySelectorAll('.fade').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
