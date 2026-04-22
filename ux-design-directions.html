@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cohort - Design Directions</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root {
+    --bg: #F5F0EB;
+    --card-bg: #FFFFFF;
+    --card-border: #E8E4DF;
+    --text: #1A1A1A;
+    --text-secondary: #6B6B6B;
+    --text-muted: #A3A3A3;
+    --accent: #F97066;
+    --accent-hover: #E85D54;
+    --accent-muted: rgba(249, 112, 102, 0.08);
+    --brand: #0078FF;
+    --brand-muted: rgba(0, 120, 255, 0.06);
+    --success: #16A34A;
+    --success-muted: rgba(22, 163, 74, 0.08);
+    --warning: #D97706;
+    --warning-muted: rgba(217, 119, 6, 0.08);
+    --error: #DC2626;
+    --divider: #F0ECE7;
+    --tile-bg: #FAFAF8;
+    --tile-border: #E8E4DF;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --radius-xs: 8px;
+  }
+
+  body.dark {
+    --bg: #0A0A0C;
+    --card-bg: #141416;
+    --card-border: #2A2A2E;
+    --text: #FAFAFA;
+    --text-secondary: #A1A1AA;
+    --text-muted: #636366;
+    --accent-muted: rgba(249, 112, 102, 0.1);
+    --brand-muted: rgba(0, 120, 255, 0.1);
+    --success-muted: rgba(34, 197, 94, 0.1);
+    --warning-muted: rgba(245, 158, 11, 0.1);
+    --divider: #1E1E22;
+    --tile-bg: #1A1A1E;
+    --tile-border: #2A2A2E;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg); color: var(--text);
+    line-height: 1.5; transition: background 0.25s, color 0.25s;
+    min-height: 100vh;
+  }
+
+  [data-lucide] { width: 20px; height: 20px; stroke-width: 1.75; }
+
+  /* ---- Showcase Nav ---- */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--card-bg); border-bottom: 1px solid var(--card-border);
+    padding: 10px 16px; display: flex; align-items: center; gap: 12px;
+    overflow-x: auto;
+  }
+  .nav-logo { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13px; white-space: nowrap; flex-shrink: 0; }
+  .nav-logo .mark { width: 24px; height: 24px; background: var(--brand); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 700; }
+  .nav-tabs { display: flex; gap: 2px; flex: 1; overflow-x: auto; }
+  .nav-tab {
+    padding: 6px 12px; border-radius: var(--radius-xs); font-size: 12px; font-weight: 500;
+    color: var(--text-muted); background: none; border: none; cursor: pointer;
+    white-space: nowrap; font-family: inherit; transition: all 0.15s;
+  }
+  .nav-tab:hover { color: var(--text-secondary); }
+  .nav-tab.active { color: var(--accent); background: var(--accent-muted); }
+  .theme-btn {
+    width: 32px; height: 32px; border-radius: var(--radius-xs);
+    background: var(--tile-bg); border: 1px solid var(--tile-border);
+    color: var(--text-secondary); cursor: pointer; display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0;
+  }
+
+  /* ---- Sections ---- */
+  .section { display: none; padding: 32px 16px 64px; }
+  .section.active { display: block; }
+  .section-header { max-width: 480px; margin: 0 auto 24px; text-align: center; }
+  .section-header h2 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .section-header p { font-size: 13px; color: var(--text-secondary); }
+  .tags { display: flex; gap: 4px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+  .tag { padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 500; }
+  .tag-a { background: var(--accent-muted); color: var(--accent); }
+  .tag-b { background: var(--brand-muted); color: var(--brand); }
+  .tag-m { background: var(--tile-bg); color: var(--text-secondary); border: 1px solid var(--tile-border); }
+
+  /* ---- Phone + Card layout ---- */
+  .surfaces {
+    display: flex; flex-direction: column; align-items: center; gap: 32px;
+    max-width: 420px; margin: 0 auto;
+  }
+
+  @media (min-width: 900px) {
+    .surfaces {
+      flex-direction: row; align-items: flex-start; gap: 40px;
+      max-width: 880px;
+    }
+  }
+
+  .surface-label {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .surface-label .dot { width: 5px; height: 5px; border-radius: 50%; }
+
+  /* ---- Phone ---- */
+  .phone {
+    width: 280px; flex-shrink: 0;
+    border-radius: 36px; border: 2.5px solid var(--card-border);
+    background: var(--card-bg); overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+  }
+  body.dark .phone { box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+
+  .phone-top { height: 50px; display: flex; align-items: flex-end; justify-content: center; position: relative; padding-bottom: 4px; }
+  .phone-top::after { content: ''; width: 90px; height: 22px; background: var(--text); border-radius: 0 0 14px 14px; position: absolute; top: 0; }
+  .phone-top .time { position: absolute; left: 20px; bottom: 4px; font-size: 11px; font-weight: 600; color: var(--text-secondary); }
+  .phone-top .signal { position: absolute; right: 20px; bottom: 4px; font-size: 10px; color: var(--text-secondary); }
+
+  .im-header {
+    padding: 6px 12px 8px; border-bottom: 1px solid var(--divider);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .im-back { color: var(--brand); font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 1px; }
+  .im-contact { flex: 1; text-align: center; }
+  .im-contact .name { font-size: 13px; font-weight: 600; }
+  .im-contact .sub { font-size: 9px; color: var(--text-muted); }
+  .im-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--brand); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; font-weight: 700; }
+
+  .im-body { padding: 10px; min-height: 420px; display: flex; flex-direction: column; }
+
+  .chat-t { font-size: 9px; color: var(--text-muted); text-align: center; margin: 6px 0; }
+  .bubble {
+    padding: 8px 11px; border-radius: 14px; font-size: 12px;
+    max-width: 82%; margin-bottom: 4px; line-height: 1.35;
+  }
+  .bubble.in { background: var(--tile-bg); border: 1px solid var(--tile-border); color: var(--text); border-bottom-left-radius: 4px; align-self: flex-start; }
+  .bubble.out { background: var(--brand); color: #fff; border-bottom-right-radius: 4px; align-self: flex-end; }
+
+  .chat-link-card {
+    padding: 8px 10px; border-radius: var(--radius-xs);
+    background: var(--tile-bg); border: 1px solid var(--tile-border);
+    max-width: 80%; align-self: flex-start; margin-bottom: 4px;
+  }
+  .chat-link-card .cl-title { font-size: 12px; font-weight: 500; color: var(--brand); }
+  .chat-link-card .cl-url { font-size: 10px; color: var(--text-muted); }
+
+  .im-input {
+    padding: 6px 10px; border-top: 1px solid var(--divider);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .im-input input {
+    flex: 1; background: var(--tile-bg); border: 1px solid var(--tile-border);
+    border-radius: 16px; padding: 6px 12px; font-size: 12px;
+    color: var(--text); font-family: inherit; outline: none;
+  }
+  .im-input input::placeholder { color: var(--text-muted); }
+  .im-send { width: 26px; height: 26px; border-radius: 50%; background: var(--brand); border: none; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+  /* ---- Dashboard Card (Poke-style) ---- */
+  .dash-card {
+    width: 320px;
+    background: var(--card-bg); border-radius: var(--radius);
+    border: 1px solid var(--card-border);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+
+  @media (max-width: 899px) {
+    .dash-card { width: 280px; }
+  }
+  body.dark .dash-card { box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+
+  .dash-header {
+    padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--divider);
+  }
+  .dash-header .dh-left { display: flex; align-items: center; gap: 6px; }
+  .dash-header .dh-logo { width: 22px; height: 22px; border-radius: 50%; background: var(--brand); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; font-weight: 700; }
+  .dash-header .dh-title { font-size: 13px; font-weight: 600; }
+  .dash-header .dh-right { display: flex; align-items: center; gap: 4px; }
+  .dash-header .dh-icon {
+    width: 28px; height: 28px; border-radius: var(--radius-xs);
+    background: none; border: none; color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .dash-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 600; }
+
+  .dash-body { padding: 16px; min-height: 420px; }
+
+  /* Greeting */
+  .greeting { text-align: center; padding: 8px 0 16px; }
+  .greeting h2 { font-size: 18px; font-weight: 600; margin-bottom: 2px; }
+  .greeting p { font-size: 12px; color: var(--text-secondary); }
+
+  /* Action Tiles */
+  .tiles { display: grid; gap: 8px; margin-bottom: 16px; }
+  .tiles-2 { grid-template-columns: 1fr 1fr; }
+  .tiles-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .tile {
+    background: var(--tile-bg); border: 1px solid var(--tile-border);
+    border-radius: var(--radius-sm); padding: 14px 12px;
+    text-align: center; cursor: pointer; transition: all 0.12s;
+  }
+  .tile:hover { border-color: var(--text-muted); }
+  .tile .tile-icon { color: var(--text-secondary); margin-bottom: 6px; display: flex; justify-content: center; }
+  .tile .tile-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+  .tile .tile-badge {
+    display: inline-block; padding: 1px 6px; border-radius: 10px;
+    font-size: 9px; font-weight: 600; margin-top: 4px;
+  }
+
+  /* List Items */
+  .list-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 0; border-bottom: 1px solid var(--divider);
+  }
+  .list-item:last-child { border-bottom: none; }
+  .li-icon {
+    width: 32px; height: 32px; border-radius: var(--radius-xs);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .li-info { flex: 1; min-width: 0; }
+  .li-info .li-title { font-size: 13px; font-weight: 500; }
+  .li-info .li-sub { font-size: 11px; color: var(--text-muted); }
+  .li-right { font-size: 11px; color: var(--text-muted); flex-shrink: 0; display: flex; align-items: center; gap: 4px; }
+
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+  .dot-green { background: var(--success); }
+  .dot-amber { background: var(--warning); }
+  .dot-red { background: var(--error); }
+  .dot-pulse { background: var(--accent); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+  .badge { padding: 2px 7px; border-radius: 10px; font-size: 10px; font-weight: 500; }
+  .badge-a { background: var(--accent-muted); color: var(--accent); }
+  .badge-s { background: var(--success-muted); color: var(--success); }
+  .badge-w { background: var(--warning-muted); color: var(--warning); }
+
+  .btn {
+    padding: 8px 16px; border-radius: var(--radius-xs); font-size: 12px;
+    font-weight: 500; font-family: inherit; cursor: pointer; border: none; transition: all 0.12s;
+  }
+  .btn-accent { background: var(--accent); color: #fff; }
+  .btn-accent:hover { background: var(--accent-hover); }
+  .btn-ghost { background: none; border: 1px solid var(--tile-border); color: var(--text-secondary); }
+
+  /* Section divider inside card */
+  .dash-section { padding: 0 0 4px; margin-bottom: 4px; }
+  .dash-section-title {
+    font-size: 10px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px;
+  }
+
+  /* Match card */
+  .match-card {
+    background: var(--tile-bg); border: 1px solid var(--tile-border);
+    border-radius: var(--radius-sm); padding: 14px; text-align: center;
+  }
+  .match-card .mc-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--tile-bg); border: 1px solid var(--tile-border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600; color: var(--text-secondary);
+    margin: 0 auto 8px;
+  }
+  .match-card .mc-name { font-size: 14px; font-weight: 500; }
+  .match-card .mc-detail { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
+
+  /* Tabs inside card */
+  .card-tabs { display: flex; border-bottom: 1px solid var(--divider); margin-bottom: 12px; }
+  .card-tab {
+    padding: 8px 14px; font-size: 12px; font-weight: 500; color: var(--text-muted);
+    background: none; border: none; border-bottom: 2px solid transparent;
+    cursor: pointer; font-family: inherit; transition: all 0.12s;
+  }
+  .card-tab:hover { color: var(--text-secondary); }
+  .card-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* Flow arrow (desktop only) */
+  .flow-arrow {
+    display: none; flex-direction: column; align-items: center;
+    gap: 4px; padding-top: 160px; flex-shrink: 0; color: var(--text-muted);
+  }
+  @media (min-width: 900px) { .flow-arrow { display: flex; } }
+  .arrow-line { width: 32px; height: 2px; background: var(--tile-border); position: relative; }
+  .arrow-line::after { content: ''; position: absolute; right: -1px; top: -3px; border: 4px solid transparent; border-left: 5px solid var(--tile-border); }
+  .arrow-text { font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; writing-mode: vertical-lr; transform: rotate(180deg); margin-top: 6px; }
+
+  /* Mobile flow indicator */
+  .mobile-flow {
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px; color: var(--text-muted); font-size: 10px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  @media (min-width: 900px) { .mobile-flow { display: none; } }
+
+  /* Stat row */
+  .stat-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .stat-item {
+    flex: 1; background: var(--tile-bg); border: 1px solid var(--tile-border);
+    border-radius: var(--radius-xs); padding: 10px; text-align: center;
+  }
+  .stat-item .stat-num { font-size: 20px; font-weight: 600; line-height: 1.1; }
+  .stat-item .stat-lbl { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+  /* Social proof */
+  .social-proof {
+    text-align: center; padding: 8px; font-size: 11px; color: var(--text-muted);
+    background: var(--tile-bg); border-radius: var(--radius-xs);
+    border: 1px solid var(--tile-border);
+  }
+
+  /* Settings list */
+  .settings-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 0; border-bottom: 1px solid var(--divider); cursor: pointer;
+  }
+  .settings-item:last-child { border-bottom: none; }
+  .settings-item .si-icon { color: var(--text-muted); }
+  .settings-item .si-label { flex: 1; font-size: 14px; font-weight: 400; }
+  .settings-item .si-arrow { color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo"><img src="cohort-logo.png" alt="C" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">Directions</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-t="d1">1. Home</button>
+    <button class="nav-tab" data-t="d2">2. Schedule</button>
+    <button class="nav-tab" data-t="d4">3. Integrations</button>
+    <button class="nav-tab" data-t="d5">4. People</button>
+    <button class="nav-tab" data-t="d6">5. Settings</button>
+  </div>
+  <button class="theme-btn" id="themeBtn"><i data-lucide="moon"></i></button>
+</nav>
+
+<!-- ===== 1. HOME ===== -->
+<section class="section active" id="d1">
+  <div class="section-header">
+    <h2>1. Home</h2>
+    <p>The first thing you see after tapping a link from iMessage. Greeting, quick actions, and what matters today.</p>
+    <div class="tags"><span class="tag tag-a">Warm + Personal</span><span class="tag tag-m">Poke-inspired</span><span class="tag tag-b">Mobile-first</span></div>
+  </div>
+  <div class="surfaces">
+    <div>
+      <div class="surface-label"><div class="dot" style="background:var(--brand)"></div>iMessage</div>
+      <div class="phone">
+        <div class="phone-top"><span class="time">9:41</span><span class="signal">5G</span></div>
+        <div class="im-header">
+          <div class="im-back"><i data-lucide="chevron-left" style="width:13px;height:13px;"></i>Back</div>
+          <div class="im-contact"><div class="name">Cohort</div><div class="sub">Your assistant</div></div>
+          <img class="im-avatar" src="cohort-logo.png" alt="Cohort" style="width:26px;height:26px;border-radius:50%;object-fit:cover;">
+        </div>
+        <div class="im-body">
+          <div class="chat-t">Today, 3:45 PM</div>
+          <div class="bubble in">heads up, csc 202 problem set 4 is due thursday. want me to block study time tomorrow?</div>
+          <div class="bubble out">yeah block wednesday evening</div>
+          <div class="bubble in">blocked wed 6-9pm for studying.</div>
+          <div class="bubble in">also found a good hackathon teammate, saleena t from your csc 202. she does backend. want an intro?</div>
+          <div class="bubble out">tell me more</div>
+          <div class="bubble in">she's looking for a frontend dev. you two share prof chen's class.</div>
+          <div class="chat-link-card">
+            <div class="cl-title">See details on your dashboard</div>
+            <div class="cl-url">cohort.app/home</div>
+          </div>
+        </div>
+        <div class="im-input"><input placeholder="iMessage"><div class="im-send"><i data-lucide="arrow-up" style="width:13px;height:13px;"></i></div></div>
+      </div>
+    </div>
+
+    <div class="flow-arrow"><div class="arrow-line"></div><div class="arrow-text">Taps link</div></div>
+    <div class="mobile-flow"><i data-lucide="arrow-down" style="width:14px;height:14px;"></i> Taps link, opens dashboard</div>
+
+    <div>
+      <div class="surface-label"><div class="dot" style="background:var(--accent)"></div>Web Dashboard</div>
+      <div class="dash-card">
+        <div class="dash-header">
+          <div class="dh-left"><img src="cohort-logo.png" alt="C" style="width:22px;height:22px;border-radius:50%;object-fit:cover;"><span class="dh-title">cohort</span></div>
+          <div class="dh-right">
+            <button class="dh-icon"><i data-lucide="bell" style="width:16px;height:16px;"></i></button>
+            <img class="dash-avatar" src="avatar-seyi.png" alt="S" style="width:26px;height:26px;border-radius:50%;object-fit:cover;">
+          </div>
+        </div>
+        <div class="dash-body">
+          <div class="greeting">
+            <h2>Good evening, Seyi</h2>
+            <p>2 deadlines this week. 1 new match. 3 emails handled.</p>
+          </div>
+
+          <div class="tiles tiles-2" style="margin-bottom: 8px;">
+            <div class="tile">
+              <div class="tile-icon"><i data-lucide="calendar"></i></div>
+              <div class="tile-label">Schedule</div>
+              <div class="tile-badge badge-w">2 due</div>
+            </div>
+            <div class="tile">
+              <div class="tile-icon"><i data-lucide="plug"></i></div>
+              <div class="tile-label">Integrations</div>
+              <div class="tile-badge badge-s">3 active</div>
+            </div>
+          </div>
+          <div class="tiles tiles-2">
+            <div class="tile">
+              <div class="tile-icon"><i data-lucide="users"></i></div>
+              <div class="tile-label">People</div>
+              <div class="tile-badge badge-a">1 new</div>
+            </div>
+            <div class="tile">
+              <div class="tile-icon"><i data-lucide="settings"></i></div>
+              <div class="tile-label">Settings</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 2. SCHEDULE ===== -->
+<section class="section" id="d2">
+  <div class="section-header">
+    <h2>2. Schedule</h2>
+    <p>Deadlines and upcoming events in one view. What's due, what's coming, what Cohort has already handled.</p>
+    <div class="tags"><span class="tag tag-a">Deadlines</span><span class="tag tag-m">Calendar</span></div>
+  </div>
+  <div class="surfaces">
+    <div>
+      <div class="surface-label"><div class="dot" style="background:var(--brand)"></div>iMessage</div>
+      <div class="phone">
+        <div class="phone-top"><span class="time">9:41</span><span class="signal">5G</span></div>
+        <div class="im-header">
+          <div class="im-back"><i data-lucide="chevron-left" style="width:13px;height:13px;"></i>Back</div>
+          <div class="im-contact"><div class="name">Cohort</div><div class="sub">Your assistant</div></div>
+          <img class="im-avatar" src="cohort-logo.png" alt="Cohort" style="width:26px;height:26px;border-radius:50%;object-fit:cover;">
+        </div>
+        <div class="im-body">
+          <div class="chat-t">Today, 8:30 AM</div>
+          <div class="bubble in">morning! you've got csc 202 lecture at 10 and math 101 at 2. also, problem set 4 is due thursday.</div>
+          <div class="bubble out">what else is coming up?</div>
+          <div class="bubble in">math 101 quiz next monday and eng 205 essay draft may 2. i already blocked study time for the problem set tomorrow evening.</div>
+          <div class="chat-link-card">
+            <div class="cl-title">See your full schedule</div>
+            <div class="cl-url">cohort.app/schedule</div>
+          </div>
+        </div>
+        <div class="im-input"><input placeholder="iMessage"><div class="im-send"><i data-lucide="arrow-up" style="width:13px;height:13px;"></i></div></div>
+      </div>
+    </div>
+    <div class="flow-arrow"><div class="arrow-line"></div><div class="arrow-text">Taps link</div></div>
+    <div class="mobile-flow"><i data-lucide="arrow-down" style="width:14px;height:14px;"></i> Taps link, opens dashboard</div>
+    <div>
+      <div class="surface-label"><div class="dot" style="background:var(--accent)"></div>Web Dashboard</div>
+      <div class="dash-card">
+        <div class="dash-header">
+          <div class="dh-left"><span class="dh-title">Schedule</span></div>
+          <div class="dh-right"><img class="dash-avatar" src="avatar-seyi.png" alt="S" style="width:26px;height:26px;border-radius:50%;object-fit:cover;"></div>
+        </div>
+        <div class="dash-body">
+          <div class="card-tabs">
+            <button class="card-tab active">Upcoming</button>
+            <button class="card-tab">This Week</button>
+            <button class="card-tab">Calendar</button>
+          </div>
+
+          <div class="dash-section-title">Due Soon</div>
+          <div class="list-item">
+            <div class="li-icon" style="background:var(--warning-muted);color:var(--warning);"><i data-lucide="file-text"></i></div>
+            <div class="li-info"><div class="li-title">CSC 202 Problem Set 4</div><div class="li-sub">Canvas, Prof Chen</div></div>
+            <span class="badge badge-w">Thu</span>
+          </div>
+          <div class="list-item">
+            <div class="li-icon" style="background:var(--brand-muted);color:var(--brand);"><i data-lucide="clock"></i></div>
+            <div class="li-info"><div class="li-title">Study Block (CSC 202)</div><div class="li-sub">Wed 6-9 PM, set by Cohort</div></div>
+            <span class="badge badge-s">Set</span>
+          </div>
+
+          <div class="dash-section-title" style="margin-top: 14px;">Next Week</div>
+          <div class="list-item">
+            <div class="li-icon" style="background:var(--tile-bg);color:var(--text-secondary);"><i data-lucide="file-text"></i></div>
+            <div class="li-info"><div class="li-title">MATH 101 Quiz Prep</div><div class="li-sub">Canvas, Prof Adeyemi</div></div>
+            <div class="li-right">Mon, Apr 28</div>
+          </div>
+
+          <div class="dash-section-title" style="margin-top: 14px;">Later</div>
+          <div class="list-item">
+            <div class="li-icon" style="background:var(--tile-bg);color:var(--text-secondary);"><i data-lucide="file-text"></i></div>
+            <div class="li-info"><div class="li-title">ENG 205 Essay Draft</div><div class="li-sub">Canvas, Prof Williams</div></div>
+            <div class="li-right">May 2</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ===== 4. INTEGRATIONS ===== -->
+<section class="section" id="d4">
+  <div class="section-header">
+    <h2>4. Integrations</h2>
+    <p>Connect and manage data sources. Inspired by Poke's integration page. Simple list, add button, done.</p>
+    <div class="tags"><span class="tag tag-a">Poke-inspired</span><span class="tag tag-m">Simple</span></div>
+  </div>
+  <div class="surfaces">
+    <div>
+      <div class="surface-label"><div class="dot" style="background:var(--brand)"></div>iMessage</div>
+      <div class="phone">
+        <div class="phone-top"><span class="time">9:41</span><span class="signal">5G</span></div>
+        <div class="im-header">
+          <div class="im-back"><i data-lucide="chevron-left" style="width:13px;height:13px;"></i>Back</div>
+          <div class="im-contact"><div class="name">Cohort</div><div class="sub">Your assistant</div></div>
+          <img class="im-avatar" src="cohort-logo.png" alt="Cohort" style="width:26px;height:26px;border-radius:50%;object-fit:cover;">
+        </div>
+        <div class="im-body">
+          <div class="chat-t">Today, 10:00 AM</div>
+          <div class="bubble in">want me to check your email for deadlines too? i can connect your gmail and keep an eye on important stuff from professors.</div>
+          <div class="bubble out">yeah sure</div>
+          <div class="chat-link-card">
+            <div class="cl-title">Connect Gmail</div>
+            <div class="cl-url">cohort.app/integrations/add</div>
+          </div>
+          <div class="bubble in">tap that link to sign in with google. i'll only read emails, never send without asking first.</div>
+        </div>
+        <div class="im-input"><input placeholder="iMessage"><div class="im-send"><i data-lucide="arrow-up" style="width:13px;height:13px;"></i></div></div>
+      </div>
+    </div>
+    <div class="flow-arrow"><div class="arrow-line"></div><div class="arrow-text">Taps link</div></div>
+    <div class="mobile-flow"><i data-lucide="arrow-down" style="width:14px;height:14px;"></i> Taps link, opens dashboard</div>
+    <div>
+      <div class="surface-label"><div class="dot" style="background:var(--accent)"></div>Web Dashboard</div>
+      <div class="dash-card">
+        <div class="dash-header">
+          <div class="dh-left"><span class="dh-title">Integrations</span></div>
+          <div class="dh-right"><button class="btn btn-accent" style="padding: 6px 12px; font-size: 11px; display: flex; align-items: center; gap: 4px;"><i data-lucide="plus" style="width:14px;height:14px;"></i> Add</button></div>
+        </div>
+        <div class="dash-body">
+          <div class="card-tabs">
+            <button class="card-tab active">All</button>
+            <button class="card-tab">Accounts</button>
+            <button class="card-tab">Other</button>
+          </div>
+
+          <div class="list-item">
+            <div class="li-icon" style="background:rgba(234,67,53,0.06);color:#EA4335;"><i data-lucide="mail"></i></div>
+            <div class="li-info"><div class="li-title">Gmail</div><div class="li-sub">herdeybayor4real@gmail.com</div></div>
+            <div class="li-right"><span class="status-dot dot-green"></span><i data-lucide="chevron-right" style="width:14px;height:14px;"></i></div>
+          </div>
+          <div class="list-item">
+            <div class="li-icon" style="background:rgba(66,133,244,0.06);color:#4285F4;"><i data-lucide="calendar"></i></div>
+            <div class="li-info"><div class="li-title">Google Calendar</div><div class="li-sub">Connected via Google</div></div>
+            <div class="li-right"><span class="status-dot dot-green"></span><i data-lucide="chevron-right" style="width:14px;height:14px;"></i></div>
+          </div>
+          <div class="list-item">
+            <div class="li-icon" style="background:rgba(226,45,44,0.06);color:#E22D2C;"><i data-lucide="book-open"></i></div>
+            <div class="li-info"><div class="li-title">Canvas (Liverpool)</div><div class="li-sub">University of Liverpool</div></div>
+            <div class="li-right"><span class="status-dot dot-amber"></span><i data-lucide="chevron-right" style="width:14px;height:14px;"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 5. PEOPLE ===== -->
+<section class="section" id="d5">
+  <div class="section-header">
+    <h2>5. People</h2>
+    <p>The network view. Pending matches, social proof, and browse. Cohort handles matching via iMessage, dashboard shows the details.</p>
+    <div class="tags"><span class="tag tag-a">Network</span><span class="tag tag-m">Social proof</span></div>
+  </div>
+  <div class="surfaces">
+    <div>
+      <div class="surface-label"><div class="dot" style="background:var(--brand)"></div>iMessage</div>
+      <div class="phone">
+        <div class="phone-top"><span class="time">9:41</span><span class="signal">5G</span></div>
+        <div class="im-header">
+          <div class="im-back"><i data-lucide="chevron-left" style="width:13px;height:13px;"></i>Back</div>
+          <div class="im-contact"><div class="name">Cohort</div><div class="sub">Your assistant</div></div>
+          <img class="im-avatar" src="cohort-logo.png" alt="Cohort" style="width:26px;height:26px;border-radius:50%;object-fit:cover;">
+        </div>
+        <div class="im-body">
+          <div class="chat-t">Today, 9:15 AM</div>
+          <div class="bubble in">found a good hackathon match. saleena t, csc 202, does backend. she's looking for a frontend dev too.</div>
+          <div class="bubble out">sounds good</div>
+          <div class="bubble in">sent her a request. i'll let you know when she accepts.</div>
+          <div class="chat-t">Today, 11:30 AM</div>
+          <div class="bubble in">saleena accepted the intro! you can see her profile and message her.</div>
+          <div class="chat-link-card">
+            <div class="cl-title">View on People</div>
+            <div class="cl-url">cohort.app/people</div>
+          </div>
+        </div>
+        <div class="im-input"><input placeholder="iMessage"><div class="im-send"><i data-lucide="arrow-up" style="width:13px;height:13px;"></i></div></div>
+      </div>
+    </div>
+    <div class="flow-arrow"><div class="arrow-line"></div><div class="arrow-text">Taps link</div></div>
+    <div class="mobile-flow"><i data-lucide="arrow-down" style="width:14px;height:14px;"></i> Taps link, opens dashboard</div>
+    <div>
+      <div class="surface-label"><div class="dot" style="background:var(--accent)"></div>Web Dashboard</div>
+      <div class="dash-card">
+        <div class="dash-header">
+          <div class="dh-left"><span class="dh-title">People</span></div>
+          <div class="dh-right"><img class="dash-avatar" src="avatar-seyi.png" alt="S" style="width:26px;height:26px;border-radius:50%;object-fit:cover;"></div>
+        </div>
+        <div class="dash-body">
+          <div class="social-proof" style="margin-bottom: 14px;">47 CS students on Cohort at Liverpool</div>
+
+          <div class="dash-section-title">Connections</div>
+          <div class="match-card" style="margin-bottom: 10px;">
+            <img class="mc-avatar" src="avatar-saleena.png" alt="E" style="width:40px;height:40px;border-radius:50%;object-fit:cover;margin:0 auto 8px;">
+            <div class="mc-name">Saleena T.</div>
+            <div class="mc-detail">CSC 202, backend dev, hackathon team</div>
+            <div style="display: flex; gap: 6px; justify-content: center;">
+              <button class="btn btn-accent">Message</button>
+              <button class="btn btn-ghost">View Profile</button>
+            </div>
+          </div>
+
+          <div class="dash-section-title" style="margin-top: 16px;">Find Someone</div>
+          <div style="margin-bottom: 10px;">
+            <input style="width: 100%; background: var(--tile-bg); border: 1px solid var(--tile-border); border-radius: var(--radius-xs); padding: 10px 12px; font-size: 13px; color: var(--text); font-family: inherit; outline: none;" placeholder="Describe who you need...">
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted); text-align: center;">or just text Cohort: "find me a study partner for math 101"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 6. SETTINGS ===== -->
+<section class="section" id="d6">
+  <div class="section-header">
+    <h2>6. Settings</h2>
+    <p>Profile, messaging preferences, privacy controls. Clean list like Poke. Simple, no clutter.</p>
+    <div class="tags"><span class="tag tag-a">Clean list</span><span class="tag tag-m">Poke-inspired</span></div>
+  </div>
+  <div class="surfaces">
+    <div>
+      <div class="surface-label"><div class="dot" style="background:var(--brand)"></div>iMessage</div>
+      <div class="phone">
+        <div class="phone-top"><span class="time">9:41</span><span class="signal">5G</span></div>
+        <div class="im-header">
+          <div class="im-back"><i data-lucide="chevron-left" style="width:13px;height:13px;"></i>Back</div>
+          <div class="im-contact"><div class="name">Cohort</div><div class="sub">Your assistant</div></div>
+          <img class="im-avatar" src="cohort-logo.png" alt="Cohort" style="width:26px;height:26px;border-radius:50%;object-fit:cover;">
+        </div>
+        <div class="im-body">
+          <div class="chat-t">Today, 10:00 PM</div>
+          <div class="bubble out">stop texting me about canvas at night</div>
+          <div class="bubble in">got it. i'll keep canvas notifications to daytime only (8am-8pm). you can always adjust this in settings.</div>
+          <div class="chat-link-card">
+            <div class="cl-title">Notification settings</div>
+            <div class="cl-url">cohort.app/settings</div>
+          </div>
+          <div class="bubble out">thanks</div>
+          <div class="bubble in">no problem. i'll still flag urgent stuff if something's due tomorrow, cool?</div>
+          <div class="bubble out">yeah that's fine</div>
+        </div>
+        <div class="im-input"><input placeholder="iMessage"><div class="im-send"><i data-lucide="arrow-up" style="width:13px;height:13px;"></i></div></div>
+      </div>
+    </div>
+    <div class="flow-arrow"><div class="arrow-line"></div><div class="arrow-text">Taps link</div></div>
+    <div class="mobile-flow"><i data-lucide="arrow-down" style="width:14px;height:14px;"></i> Taps link, opens dashboard</div>
+    <div>
+      <div class="surface-label"><div class="dot" style="background:var(--accent)"></div>Web Dashboard</div>
+      <div class="dash-card">
+        <div class="dash-header">
+          <div class="dh-left"><span class="dh-title">Settings</span></div>
+          <div class="dh-right"><button class="dh-icon" style="font-size:18px;">&#10005;</button></div>
+        </div>
+        <div class="dash-body">
+          <div style="text-align: center; margin-bottom: 16px;">
+            <img src="avatar-seyi.png" alt="Sherifdeen" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px; display: block;">
+            <div style="font-size: 16px; font-weight: 600;">Seyi Ogundipe</div>
+            <div style="font-size: 12px; color: var(--text-muted);">University of Liverpool</div>
+          </div>
+
+          <div class="settings-item">
+            <span class="si-icon"><i data-lucide="message-circle"></i></span>
+            <span class="si-label">Messaging</span>
+            <span class="si-arrow"><i data-lucide="chevron-right" style="width:16px;height:16px;"></i></span>
+          </div>
+          <div class="settings-item">
+            <span class="si-icon"><i data-lucide="shield"></i></span>
+            <span class="si-label">Privacy</span>
+            <span class="si-arrow"><i data-lucide="chevron-right" style="width:16px;height:16px;"></i></span>
+          </div>
+          <div class="settings-item">
+            <span class="si-icon"><i data-lucide="user"></i></span>
+            <span class="si-label">Profile</span>
+            <span class="si-arrow"><i data-lucide="chevron-right" style="width:16px;height:16px;"></i></span>
+          </div>
+          <div class="settings-item">
+            <span class="si-icon"><i data-lucide="bell"></i></span>
+            <span class="si-label">Notifications</span>
+            <span class="si-arrow"><i data-lucide="chevron-right" style="width:16px;height:16px;"></i></span>
+          </div>
+          <div style="border-top: 1px solid var(--divider); margin-top: 4px; padding-top: 4px;">
+            <div class="settings-item">
+              <span class="si-icon"><i data-lucide="log-out"></i></span>
+              <span class="si-label">Log out</span>
+              <span class="si-arrow"><i data-lucide="chevron-right" style="width:16px;height:16px;"></i></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  lucide.createIcons();
+
+  document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(tab.dataset.t).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  let dark = false;
+  document.getElementById('themeBtn').addEventListener('click', () => {
+    dark = !dark;
+    document.body.classList.toggle('dark', dark);
+    document.getElementById('themeBtn').innerHTML = dark ? '<i data-lucide="sun"></i>' : '<i data-lucide="moon"></i>';
+    lucide.createIcons();
+  });
+</script>
+</body>
+</html>
